@@ -1,0 +1,31 @@
+﻿@using IslahiTohfa.Application.DTOs
+
+<MudCard Class="book-card" Style="height: 100%;">
+    <MudCardMedia Image="@Book.ThumbnailUrl" Height="200" />
+    <MudCardContent>
+        <MudText Typo="Typo.h6" Class="mb-2">@Book.Title</MudText>
+        <MudText Typo="Typo.body2" Color="Color.Secondary">@Book.Author</MudText>
+        <MudRating SelectedValue="@((int)Book.AverageRating)" ReadOnly="true" Size="Size.Small" />
+    </MudCardContent>
+    <MudCardActions>
+        <MudButton Color="Color.Primary" 
+                  StartIcon="@Icons.Material.Filled.Visibility"
+                  Href="@($"/book/{Book.Id}")">
+            عرض / View
+        </MudButton>
+    </MudCardActions>
+</MudCard>
+
+@code {
+    [Parameter] public BookDto Book { get; set; } = new();
+}
+
+<style>
+    .book-card {
+        transition: transform 0.3s ease;
+    }
+    
+    .book-card:hover {
+        transform: translateY(-5px);
+    }
+</style>

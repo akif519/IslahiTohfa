@@ -1,0 +1,332 @@
+﻿@page "/"
+@using IsladebhiTohfa.Application.DTOs
+@using IsladebhiTohfa.Application.Services
+@inject IBookService BookService
+@inject ILocalStorageService LocalStorage
+@inject NavigationManager Navigation
+
+<PageTitle>Islahi Tohfa - Educational Islamic Books</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="pa-4">
+    <!-- Hero Section -->
+    <MudGrid Class="mb-8">
+        <MudItem xs="12" md="6" Class="d-flex flex-column justify-center">
+            <MudText Typo="Typo.h2" Class="mb-4" Color="Color.Primary">
+                <MudIcon Icon="@Icons.Material.Filled.MenuBook" Class="mr-2" />
+                مرحباً بكم في الإصلاحي تحفة
+            </MudText>
+            <MudText Typo="Typo.h4" Class="mb-2" Color="Color.Secondary">
+                Welcome to Islahi Tohfa
+            </MudText>
+            <MudText Typo="Typo.body1" Class="mb-6" Color="Color.Dark">
+                اكتشف كنز من الكتب التعليمية الإسلامية<br />
+                Discover a treasure of Islamic educational books
+            </MudText>
+            <MudStack Row="true" Spacing="3">
+                <MudButton Color="Color.Primary" 
+                          Size="Size.Large" 
+                          StartIcon="@Icons.Material.Filled.AutoStories"
+                          OnClick="NavigateToBooks">
+                    ابدأ القراءة / Start Reading
+                </MudButton>
+                <MudButton Color="Color.Secondary" 
+                          Variant="Variant.Outlined" 
+                          Size="Size.Large"
+                          StartIcon="@Icons.Material.Filled.Info"
+                          OnClick="NavigateToAbout">
+                    حول الموقع / About
+                </MudButton>
+            </MudStack>
+        </MudItem>
+        <MudItem xs="12" md="6" Class="text-center">
+            <MudPaper Class="pa-4" Elevation="3" Style="background: linear-gradient(135deg, #1B7332 0%, #DAA520 100%);">
+                <MudImage Src="/images/islahi-tohfa-logo.png" 
+                         Alt="Islahi Tohfa Logo" 
+                         Class="hero-logo"
+                         Style="max-width: 300px; filter: brightness(1.1);" />
+                <MudText Typo="Typo.h6" Class="mt-3" Style="color: white;">
+                    الهدية التعليمية
+                </MudText>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+
+    <!-- Search Section -->
+    <MudPaper Class="pa-4 mb-6" Elevation="2">
+        <MudGrid>
+            <MudItem xs="12" md="8">
+                <MudTextField @bind-Value="searchQuery"
+                             Placeholder="ابحث عن الكتب... / Search for books..."
+                             Adornment="Adornment.Start"
+                             AdornmentIcon="@Icons.Material.Filled.Search"
+                             OnKeyPress="OnSearchKeyPress"
+                             Culture="@System.Globalization.CultureInfo.InvariantCulture" />
+            </MudItem>
+            <MudItem xs="12" md="4">
+                <MudButton Color="Color.Primary" 
+                          Variant="Variant.Filled" 
+                          StartIcon="@Icons.Material.Filled.Search"
+                          FullWidth="true"
+                          OnClick="PerformSearch">
+                    بحث / Search
+                </MudButton>
+            </MudItem>
+        </MudGrid>
+    </MudPaper>
+
+    <!-- Loading Indicator -->
+    @if (isLoading)
+    {
+        <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="mb-4" />
+    }
+
+    <!-- Featured Books Section -->
+    @if (featuredBooks?.Any() == true)
+    {
+        <BookSlider Title="الكتب المميزة / Featured Books" 
+                   TitleIcon="@Icons.Material.Filled.Star"
+                   Books="@featuredBooks" 
+                   OnBookClick="OnBookClick" />
+    }
+
+    <!-- Categories Grid -->
+    <MudText Typo="Typo.h4" Class="mb-4" Color="Color.Primary">
+        <MudIcon Icon="@Icons.Material.Filled.Category" Class="mr-2" />
+        الفئات / Categories
+    </MudText>
+    
+    <MudGrid Class="mb-8">
+        @foreach (var category in categories)
+        {
+            <MudItem xs="12" sm="6" md="4" lg="3">
+                <MudCard Class="category-card" Style="height: 150px; cursor: pointer;"
+                        @onclick="() => NavigateToCategory(category.Id)">
+                    <MudCardContent Class="d-flex flex-column justify-center align-center text-center">
+                        <MudIcon Icon="@category.IconClass" 
+                                Size="Size.Large" 
+                                Color="Color.Primary" 
+                                Class="mb-2" />
+                        <MudText Typo="Typo.h6" Color="Color.Primary">
+                            @category.NameArabic
+                        </MudText>
+                        <MudText Typo="Typo.body2" Color="Color.Secondary">
+                            @category.Name
+                        </MudText>
+                        <MudText Typo="Typo.caption" Color="Color.Dark">
+                            @category.BookCount كتاب / @category.BookCount Books
+                        </MudText>
+                    </MudCardContent>
+                </MudCard>
+            </MudItem>
+        }
+    </MudGrid>
+
+    <!-- Top Rated Books -->
+    @if (topRatedBooks?.Any() == true)
+    {
+        <BookSlider Title="الكتب الأعلى تقييماً / Top Rated Books" 
+                   TitleIcon="@Icons.Material.Filled.ThumbUp"
+                   Books="@topRatedBooks" 
+                   OnBookClick="OnBookClick" />
+    }
+
+    <!-- Most Viewed Books -->
+    @if (mostViewedBooks?.Any() == true)
+    {
+        <BookSlider Title="الكتب الأكثر مشاهدة / Most Viewed Books" 
+                   TitleIcon="@Icons.Material.Filled.Visibility"
+                   Books="@mostViewedBooks" 
+                   OnBookClick="OnBookClick" />
+    }
+
+    <!-- Recent Books -->
+    @if (recentBooks?.Any() == true)
+    {
+        <BookSlider Title="الإضافات الحديثة / Recent Additions" 
+                   TitleIcon="@Icons.Material.Filled.NewReleases"
+                   Books="@recentBooks" 
+                   OnBookClick="OnBookClick" />
+    }
+
+    <!-- Statistics Section -->
+    <MudPaper Class="pa-6 mb-6" Elevation="3">
+        <MudText Typo="Typo.h5" Class="mb-4 text-center" Color="Color.Primary">
+            إحصائيات الموقع / Site Statistics
+        </MudText>
+        <MudGrid>
+            <MudItem xs="6" md="3" Class="text-center">
+                <MudText Typo="Typo.h4" Color="Color.Primary">@totalBooks</MudText>
+                <MudText Typo="Typo.body2">كتاب / Books</MudText>
+            </MudItem>
+            <MudItem xs="6" md="3" Class="text-center">
+                <MudText Typo="Typo.h4" Color="Color.Secondary">@totalUsers</MudText>
+                <MudText Typo="Typo.body2">مستخدم / Users</MudText>
+            </MudItem>
+            <MudItem xs="6" md="3" Class="text-center">
+                <MudText Typo="Typo.h4" Color="Color.Success">@totalDownloads</MudText>
+                <MudText Typo="Typo.body2">تحميل / Downloads</MudText>
+            </MudItem>
+            <MudItem xs="6" md="3" Class="text-center">
+                <MudText Typo="Typo.h4" Color="Color.Info">@totalViews</MudText>
+                <MudText Typo="Typo.body2">مشاهدة / Views</MudText>
+            </MudItem>
+        </MudGrid>
+    </MudPaper>
+</MudContainer>
+
+<style>
+    .hero-logo {
+        transition: transform 0.3s ease;
+    }
+    
+    .hero-logo:hover {
+        transform: scale(1.05);
+    }
+    
+    .category-card {
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+    }
+    
+    .category-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(27, 115, 50, 0.2);
+        border-color: #1B7332;
+    }
+    
+    .mud-input-slot {
+        direction: rtl;
+    }
+    
+    .rtl-support {
+        direction: rtl;
+        text-align: right;
+    }
+</style>
+
+@code {
+    private bool isLoading = true;
+    private string searchQuery = "";
+    
+    // Data collections
+    private List<BookDto> featuredBooks = new();
+    private List<BookDto> topRatedBooks = new();
+    private List<BookDto> mostViewedBooks = new();
+    private List<BookDto> recentBooks = new();
+    private List<CategoryDto> categories = new();
+    
+    // Statistics
+    private int totalBooks = 0;
+    private int totalUsers = 0;
+    private int totalDownloads = 0;
+    private int totalViews = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            isLoading = true;
+            StateHasChanged();
+
+            // Load all data concurrently
+            var tasks = new[]
+            {
+                LoadFeaturedBooks(),
+                LoadTopRatedBooks(),
+                LoadMostViewedBooks(),
+                LoadRecentBooks(),
+                LoadCategories(),
+                LoadStatistics()
+            };
+
+            await Task.WhenAll(tasks);
+        }
+        catch (Exception ex)
+        {
+            // Log error and show notification
+            // await NotificationService.ShowError("حدث خطأ في تحميل البيانات / Error loading data");
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task LoadFeaturedBooks()
+    {
+        featuredBooks = await BookService.GetFeaturedBooksAsync(6);
+    }
+
+    private async Task LoadTopRatedBooks()
+    {
+        topRatedBooks = await BookService.GetTopRatedBooksAsync(6);
+    }
+
+    private async Task LoadMostViewedBooks()
+    {
+        mostViewedBooks = await BookService.GetMostViewedBooksAsync(6);
+    }
+
+    private async Task LoadRecentBooks()
+    {
+        recentBooks = await BookService.GetRecentBooksAsync(6);
+    }
+
+    private async Task LoadCategories()
+    {
+        categories = await BookService.GetCategoriesWithBookCountAsync();
+    }
+
+    private async Task LoadStatistics()
+    {
+        var stats = await BookService.GetSiteStatisticsAsync();
+        totalBooks = stats.TotalBooks;
+        totalUsers = stats.TotalUsers;
+        totalDownloads = stats.TotalDownloads;
+        totalViews = stats.TotalViews;
+    }
+
+    private async Task OnSearchKeyPress(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await PerformSearch();
+        }
+    }
+
+    private async Task PerformSearch()
+    {
+        if (!string.IsNullOrWhiteSpace(searchQuery))
+        {
+            // Track search activity
+            await BookService.TrackUserActivityAsync(new UserActivityDto
+            {
+                ActivityType = ActivityType.BookSearched,
+                AdditionalData = searchQuery
+            });
+
+            Navigation.NavigateTo($"/books/search?q={Uri.EscapeDataString(searchQuery)}");
+        }
+    }
+
+    private void OnBookClick(BookDto book)
+    {
+        Navigation.NavigateTo($"/book/{book.Id}");
+    }
+
+    private void NavigateToBooks()
+    {
+        Navigation.NavigateTo("/books");
+    }
+
+    private void NavigateToAbout()
+    {
+        Navigation.NavigateTo("/about");
+    }
+
+    private void NavigateToCategory(int categoryId)
+    {
+        Navigation.NavigateTo($"/books/category/{categoryId}");
+    }
+}

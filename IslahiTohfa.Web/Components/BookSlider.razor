@@ -1,0 +1,30 @@
+﻿@using IslahiTohfa.Application.DTOs
+
+<div class="book-slider-container mb-8">
+    <MudText Typo="Typo.h5" Color="Color.Primary" Class="mb-4">
+        @Title
+    </MudText>
+
+    @if (Books?.Any() == true)
+    {
+        <MudGrid>
+            @foreach (var book in Books.Take(6))
+            {
+                <MudItem xs="12" sm="6" md="4" lg="2">
+                    <BookCard Book="@book" />
+                </MudItem>
+            }
+        </MudGrid>
+    }
+    else
+    {
+        <MudText Typo="Typo.body2" Class="text-center" Color="Color.Secondary">
+            لا توجد كتب متاحة / No books available
+        </MudText>
+    }
+</div>
+
+@code {
+    [Parameter] public string Title { get; set; } = "";
+    [Parameter] public IEnumerable<BookDto> Books { get; set; } = new List<BookDto>();
+}

@@ -1,0 +1,357 @@
+﻿:root {
+    /* Islamic Green Color Palette */
+    --islamic-primary: #1B7332;
+    --islamic-primary-light: #22a83a;
+    --islamic-primary-dark: #146428;
+    /* Gold/Yellow Accent */
+    --islamic-secondary: #DAA520;
+    --islamic-secondary-light: #fbbf24;
+    --islamic-secondary-dark: #b8860b;
+    /* Additional Colors */
+    --islamic-blue: #1e3a8a;
+    --islamic-blue-light: #3b82f6;
+    /* Typography */
+    --font-arabic: 'Amiri', 'Scheherazade', serif;
+    --font-latin: 'Inter', 'Roboto', sans-serif;
+    /* Spacing */
+    --spacing-unit: 8px;
+    --border-radius: 8px;
+    --shadow-light: 0 2px 4px rgba(0, 0, 0, 0.1);
+    --shadow-medium: 0 4px 12px rgba(0, 0, 0, 0.15);
+    --shadow-heavy: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+/* RTL Support */
+[dir="rtl"] {
+    direction: rtl;
+    text-align: right;
+}
+
+    [dir="rtl"] .mud-input-control {
+        direction: rtl;
+    }
+
+        [dir="rtl"] .mud-input-control input {
+            text-align: right;
+        }
+
+/* Arabic Typography */
+.arabic-text {
+    font-family: var(--font-arabic);
+    font-weight: 400;
+    line-height: 1.8;
+}
+
+.arabic-heading {
+    font-family: var(--font-arabic);
+    font-weight: 700;
+    line-height: 1.4;
+}
+
+/* Islamic Patterns */
+.islamic-pattern {
+    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 60 60"><g fill-opacity="0.05"><polygon fill="%23000" points="36 34 36 30 30 30 30 36 34 36 34 30 36 30 36 34"/></g></svg>');
+    background-size: 60px 60px;
+}
+
+.geometric-border {
+    border: 2px solid var(--islamic-primary);
+    border-image: linear-gradient(45deg, var(--islamic-primary), var(--islamic-secondary)) 1;
+}
+
+/* Book Cards */
+.book-card {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    position: relative;
+}
+
+    .book-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-heavy);
+    }
+
+    .book-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--islamic-primary), var(--islamic-secondary));
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .book-card:hover::before {
+        opacity: 1;
+    }
+
+.book-thumbnail {
+    aspect-ratio: 3/4;
+    object-fit: cover;
+    width: 100%;
+    transition: transform 0.3s ease;
+}
+
+.book-card:hover .book-thumbnail {
+    transform: scale(1.05);
+}
+
+/* Islamic Decorative Elements */
+.decorative-separator {
+    text-align: center;
+    margin: 2rem 0;
+    position: relative;
+}
+
+    .decorative-separator::before,
+    .decorative-separator::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        width: 45%;
+        height: 1px;
+        background: linear-gradient(to right, transparent, var(--islamic-primary), transparent);
+    }
+
+    .decorative-separator::before {
+        left: 0;
+    }
+
+    .decorative-separator::after {
+        right: 0;
+    }
+
+    .decorative-separator .icon {
+        background: white;
+        padding: 0 1rem;
+        color: var(--islamic-primary);
+    }
+
+/* Prayer Time Indicator */
+.prayer-time-indicator {
+    position: fixed;
+    top: 100px;
+    right: 20px;
+    background: var(--islamic-primary);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    z-index: 1000;
+    box-shadow: var(--shadow-medium);
+    opacity: 0.9;
+}
+
+/* Islamic Calendar Widget */
+.islamic-calendar {
+    background: linear-gradient(135deg, var(--islamic-primary) 0%, var(--islamic-blue) 100%);
+    color: white;
+    padding: 1rem;
+    border-radius: var(--border-radius);
+    text-align: center;
+}
+
+.hijri-date {
+    font-family: var(--font-arabic);
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+.gregorian-date {
+    font-size: 0.9rem;
+    opacity: 0.8;
+    margin-top: 0.5rem;
+}
+
+/* Quranic Verse Styling */
+.quran-verse {
+    font-family: var(--font-arabic);
+    font-size: 1.4rem;
+    line-height: 2;
+    text-align: center;
+    padding: 2rem;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    border-left: 4px solid var(--islamic-primary);
+    border-radius: var(--border-radius);
+    margin: 2rem 0;
+    position: relative;
+}
+
+    .quran-verse::before {
+        content: '"';
+        font-size: 3rem;
+        color: var(--islamic-primary);
+        position: absolute;
+        top: -10px;
+        right: 20px;
+        font-family: Georgia, serif;
+    }
+
+.verse-reference {
+    font-size: 0.9rem;
+    color: var(--islamic-primary);
+    margin-top: 1rem;
+    font-weight: 600;
+}
+
+/* Loading Animations */
+.islamic-loader {
+    display: inline-block;
+    position: relative;
+    width: 40px;
+    height: 40px;
+}
+
+    .islamic-loader div {
+        box-sizing: border-box;
+        display: block;
+        position: absolute;
+        width: 32px;
+        height: 32px;
+        margin: 4px;
+        border: 4px solid var(--islamic-primary);
+        border-radius: 50%;
+        animation: islamic-loader-spin 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+        border-color: var(--islamic-primary) transparent transparent transparent;
+    }
+
+        .islamic-loader div:nth-child(1) {
+            animation-delay: -0.45s;
+        }
+
+        .islamic-loader div:nth-child(2) {
+            animation-delay: -0.3s;
+        }
+
+        .islamic-loader div:nth-child(3) {
+            animation-delay: -0.15s;
+        }
+
+@keyframes islamic-loader-spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .prayer-time-indicator {
+        position: static;
+        margin: 1rem;
+        display: inline-block;
+    }
+
+    .quran-verse {
+        font-size: 1.2rem;
+        padding: 1.5rem;
+    }
+
+    .book-card {
+        margin-bottom: 1rem;
+    }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --islamic-primary: #22a83a;
+        --islamic-primary-light: #4ade80;
+        --islamic-primary-dark: #166534;
+    }
+
+    .quran-verse {
+        background: linear-gradient(135deg, #374151 0%, #1f2937 100%);
+        color: #f9fafb;
+    }
+
+    .islamic-calendar {
+        background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+    }
+}
+
+/* Print Styles */
+@media print {
+    .prayer-time-indicator,
+    .mud-appbar,
+    .mud-drawer,
+    .floating-action-button {
+        display: none !important;
+    }
+
+    .book-card {
+        break-inside: avoid;
+        box-shadow: none;
+    }
+
+    .quran-verse {
+        background: white;
+        border: 1px solid #ccc;
+    }
+}
+
+/* Accessibility Enhancements */
+@media (prefers-reduced-motion: reduce) {
+    .book-card,
+    .book-thumbnail,
+    .islamic-loader div {
+        animation: none;
+        transition: none;
+    }
+
+        .book-card:hover {
+            transform: none;
+        }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+    :root {
+        --islamic-primary: #000000;
+        --islamic-secondary: #ffffff;
+    }
+
+    .book-card {
+        border: 2px solid currentColor;
+    }
+
+    .quran-verse {
+        border: 2px solid currentColor;
+        background: white;
+        color: black;
+    }
+}
+
+/* Focus Indicators */
+.mud-button:focus,
+.mud-icon-button:focus,
+.mud-input:focus {
+    outline: 2px solid var(--islamic-primary);
+    outline-offset: 2px;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--islamic-primary);
+    border-radius: 4px;
+}
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: var(--islamic-primary-dark);
+    }

@@ -1,0 +1,59 @@
+﻿@page "/"
+@using IslahiTohfa.Application.DTOs
+@using IslahiTohfa.Application.Services
+@inject IBookService BookService
+
+<PageTitle>الإصلاحي تحفة - Islahi Tohfa</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="pa-4">
+    <!-- Hero Section -->
+    <MudGrid Class="mb-8">
+        <MudItem xs="12" md="6" Class="d-flex flex-column justify-center">
+            <MudText Typo="Typo.h2" Class="mb-4" Color="Color.Primary">
+                <MudIcon Icon="@Icons.Material.Filled.MenuBook" Class="mr-2" />
+                مرحباً بكم في الإصلاحي تحفة
+            </MudText>
+            <MudText Typo="Typo.h4" Class="mb-2" Color="Color.Secondary">
+                Welcome to Islahi Tohfa
+            </MudText>
+            <MudText Typo="Typo.body1" Class="mb-6" Color="Color.Dark">
+                اكتشف كنز من الكتب التعليمية الإسلامية<br />
+                Discover a treasure of Islamic educational books
+            </MudText>
+            <MudButton Color="Color.Primary" 
+                      Size="Size.Large" 
+                      StartIcon="@Icons.Material.Filled.AutoStories"
+                      Href="/books">
+                ابدأ القراءة / Start Reading
+            </MudButton>
+        </MudItem>
+        <MudItem xs="12" md="6" Class="text-center">
+            <MudImage Src="/images/islahi-tohfa-logo.png" 
+                     Alt="Islahi Tohfa Logo" 
+                     Style="max-width: 300px;" />
+        </MudItem>
+    </MudGrid>
+
+    <!-- Featured Books Section -->
+    @if (featuredBooks?.Any() == true)
+    {
+        <BookSlider Title="الكتب المميزة / Featured Books" 
+                   Books="@featuredBooks" />
+    }
+</MudContainer>
+
+@code {
+    private List<BookDto> featuredBooks = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            featuredBooks = await BookService.GetFeaturedBooksAsync(6);
+        }
+        catch (Exception ex)
+        {
+            // Handle error
+        }
+    }
+}

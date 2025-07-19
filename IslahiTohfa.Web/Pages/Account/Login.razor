@@ -1,0 +1,60 @@
+﻿@page "/account/login"
+@using IslahiTohfa.Application.DTOs
+@inject ISnackbar Snackbar
+@inject NavigationManager Navigation
+
+<PageTitle>تسجيل الدخول - Login</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Small" Class="pa-4">
+    <MudPaper Class="pa-8" Elevation="3">
+        <div class="text-center mb-6">
+            <MudText Typo="Typo.h4" Color="Color.Primary">
+                تسجيل الدخول / Login
+            </MudText>
+        </div>
+
+        <EditForm Model="@loginModel" OnValidSubmit="OnValidSubmit">
+            <DataAnnotationsValidator />
+            
+            <MudTextField @bind-Value="loginModel.EmailOrUsername"
+                         For="@(() => loginModel.EmailOrUsername)"
+                         Label="البريد الإلكتروني / Email"
+                         Required="true"
+                         Margin="Margin.Normal" />
+
+            <MudTextField @bind-Value="loginModel.Password"
+                         For="@(() => loginModel.Password)"
+                         Label="كلمة المرور / Password"
+                         InputType="InputType.Password"
+                         Required="true"
+                         Margin="Margin.Normal" />
+
+            <MudButton ButtonType="ButtonType.Submit"
+                      Variant="Variant.Filled"
+                      Color="Color.Primary"
+                      Size="Size.Large"
+                      FullWidth="true"
+                      Class="mt-4">
+                تسجيل الدخول / Login
+            </MudButton>
+        </EditForm>
+    </MudPaper>
+</MudContainer>
+
+@code {
+    private LoginDto loginModel = new();
+
+    private async Task OnValidSubmit()
+    {
+        try
+        {
+            // Implement login logic
+            Snackbar.Add("تم تسجيل الدخول بنجاح / Login successful", Severity.Success);
+            Navigation.NavigateTo("/");
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add("خطأ في تسجيل الدخول / Login failed", Severity.Error);
+        }
+    }
+}

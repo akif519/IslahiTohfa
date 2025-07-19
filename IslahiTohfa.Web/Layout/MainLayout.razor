@@ -1,0 +1,110 @@
+﻿@using Microsoft.AspNetCore.Components.Authorization
+@using IslahiTohfa.Application.DTOs
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager Navigation
+@inject IDialogService DialogService
+
+@inherits LayoutView
+
+<MudThemeProvider Theme="@currentTheme" />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<MudLayout>
+    <!-- App Bar -->
+    <MudAppBar Elevation="1" Style="background: linear-gradient(135deg, #1B7332 0%, #22a83a 100%);">
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" 
+                      Color="Color.Inherit" 
+                      Edge="Edge.Start" 
+                      OnClick="@ToggleDrawer" />
+        
+        <!-- Logo -->
+        <MudStack Row="true" AlignItems="AlignItems.Center" Class="mr-4">
+            <MudImage Src="/images/islahi-tohfa-logo.png" 
+                     Alt="Islahi Tohfa" 
+                     Style="height: 40px; cursor: pointer;"
+                     @onclick="NavigateHome" />
+            <MudHidden Breakpoint="Breakpoint.SmAndDown">
+                <MudText Typo="Typo.h6" Style="color: white; font-weight: bold;">
+                    الإصلاحي تحفة
+                </MudText>
+            </MudHidden>
+        </MudStack>
+
+        <MudSpacer />
+
+        <!-- User Menu -->
+        <AuthorizeView>
+            <Authorized>
+                <MudMenu Icon="@Icons.Material.Filled.AccountCircle" 
+                        Color="Color.Inherit">
+                    <ChildContent>
+                        <MudIconButton Icon="@Icons.Material.Filled.AccountCircle" 
+                                      Color="Color.Inherit" />
+                    </ChildContent>
+                    <MenuItems>
+                        <MudMenuItem Icon="@Icons.Material.Filled.Person">
+                            الملف الشخصي / Profile
+                        </MudMenuItem>
+                        <MudMenuItem Icon="@Icons.Material.Filled.Logout" 
+                                    OnClick="Logout">
+                            تسجيل الخروج / Logout
+                        </MudMenuItem>
+                    </MenuItems>
+                </MudMenu>
+            </Authorized>
+            <NotAuthorized>
+                <MudStack Row="true" Spacing="2">
+                    <MudButton Color="Color.Inherit" 
+                              StartIcon="@Icons.Material.Filled.Login"
+                              Href="/account/login">
+                        تسجيل الدخول
+                    </MudButton>
+                </MudStack>
+            </NotAuthorized>
+        </AuthorizeView>
+    </MudAppBar>
+
+    <!-- Navigation Drawer -->
+    <MudDrawer @bind-Open="@isDrawerOpen" 
+              ClipMode="DrawerClipMode.Always" 
+              Elevation="2">
+        <MudNavMenu>
+            <MudNavLink Href="/" 
+                       Icon="@Icons.Material.Filled.Home" 
+                       Match="NavLinkMatch.All">
+                الرئيسية / Home
+            </MudNavLink>
+            
+            <MudNavLink Href="/books" 
+                       Icon="@Icons.Material.Filled.MenuBook">
+                الكتب / Books
+            </MudNavLink>
+        </MudNavMenu>
+    </MudDrawer>
+
+    <!-- Main Content -->
+    <MudMainContent>
+        <MudContainer MaxWidth="MaxWidth.False" Class="pa-0">
+            @Body
+        </MudContainer>
+    </MudMainContent>
+</MudLayout>
+
+@code {
+    private bool isDrawerOpen = false;
+    private MudTheme currentTheme = new MudTheme();
+
+    private void ToggleDrawer()
+    {
+        isDrawerOpen = !isDrawerOpen;
+    }
+
+    private void NavigateHome() => Navigation.NavigateTo("/");
+
+    private async Task Logout()
+    {
+        // Implement logout logic
+        Navigation.NavigateTo("/");
+    }
+}
