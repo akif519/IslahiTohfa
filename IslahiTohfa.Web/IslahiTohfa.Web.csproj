@@ -19,8 +19,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Pages\Books\" />
-    <Folder Include="Pages\Admin\" />
     <Folder Include="wwwroot\images\icons\" />
     <Folder Include="wwwroot\images\books\" />
     <Folder Include="wwwroot\lib\" />

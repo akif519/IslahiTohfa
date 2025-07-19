@@ -1,0 +1,835 @@
+﻿@page "/book/{bookId:int}/read"
+@using IslhiTohfa.Application.DTOs
+@using IslahiTohfa.Application.Services
+@using IslahiTohfa.Domain.Enums
+@inject IBookService BookService
+@inject IJSRuntime JSRuntime
+@inject ISnackbar Snackbar
+@inject NavigationManager Navigation
+@inject IDialogService DialogService
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<PageTitle>@currentBook?.Title - قراءة الكتاب</PageTitle>
+
+@if (currentBook != null)
+{
+    <MudContainer MaxWidth="MaxWidth.False" Style="height: 100vh; padding: 0;">
+        <MudAppBar Elevation="1" Style="height: 60px;">
+            <MudGrid AlignItems="Center" Style="width: 100%;">
+                <MudItem xs="3" Class="d-flex align-center">
+                    <MudIconButton Icon="@Icons.Material.Filled.ArrowBack" 
+                                  Color="Color.Inherit"
+                                  OnClick="GoBack" />
+                    <MudText Typo="Typo.h6" Class="ml-2 text-truncate">
+                        @currentBook.Title
+                    </MudText>
+                </MudItem>
+                
+                <MudItem xs="6" Class="text-center">
+                    <MudButtonGroup Variant="Variant.Text">
+                        <MudIconButton Icon="@Icons.Material.Filled.ZoomOut" 
+                                      OnClick="ZoomOut"
+                                      Disabled="@(zoomLevel <= 0.5)" />
+                        <MudText Class="d-flex align-center px-3">
+                            @((int)(zoomLevel * 100))%
+                        </MudText>
+                        <MudIconButton Icon="@Icons.Material.Filled.ZoomIn" 
+                                      OnClick="ZoomIn"
+                                      Disabled="@(zoomLevel >= 3.0)" />
+                        
+                        <MudDivider Vertical="true" Class="mx-2" />
+                        
+                        <MudIconButton Icon="@Icons.Material.Filled.RotateLeft" 
+                                      OnClick="RotateLeft" />
+                        <MudIconButton Icon="@Icons.Material.Filled.RotateRight" 
+                                      OnClick="RotateRight" />
+                        
+                        <MudDivider Vertical="true" Class="mx-2" />
+                        
+                        <MudIconButton Icon="@(isFullscreen ? Icons.Material.Filled.FullscreenExit : Icons.Material.Filled.Fullscreen)" 
+                                      OnClick="ToggleFullscreen" />
+                    </MudButtonGroup>
+                </MudItem>
+                
+                <MudItem xs="3" Class="text-right">
+                    <MudStack Row="true" Justify="Justify.FlexEnd" AlignItems="AlignItems.Center">
+                        <MudText Typo="Typo.body2" Class="ml-2">
+                            صفحة @currentPage من @totalPages
+                        </MudText>
+                        <MudIconButton Icon="@Icons.Material.Filled.Info" 
+                                      OnClick="ToggleSidebar" />
+                    </MudStack>
+                </MudItem>
+            </MudGrid>
+        </MudAppBar>
+
+        <div style="height: calc(100vh - 60px); display: flex;">
+            <!-- PDF Viewer -->
+            <div style="flex: 1; position: relative; background: #525659;">
+                <div id="pdf-container" style="height: 100%; width: 100%; overflow: auto;">
+                    <canvas id="pdf-canvas" style="display: block; margin: 0 auto;"></canvas>
+                </div>
+                
+                <!-- Loading overlay -->
+                @if (isLoadingPdf)
+                {
+                    <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; 
+                               background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center;">
+                        <MudPaper Class="pa-4 text-center">
+                            <MudProgressCircular Indeterminate="true" Class="mb-2" />
+                            <MudText>جاري تحميل الكتاب... / Loading book...</MudText>
+                        </MudPaper>
+                    </div>
+                }
+
+                <!-- Navigation arrows -->
+                <div style="position: absolute; top: 50%; left: 20px; transform: translateY(-50%);">
+                    <MudFab Color="Color.Primary" 
+                           Icon="@Icons.Material.Filled.NavigateBefore"
+                           Size="Size.Medium"
+                           OnClick="PreviousPage"
+                           Disabled="@(currentPage <= 1)"
+                           Style="opacity: 0.8;" />
+                </div>
+                
+                <div style="position: absolute; top: 50%; right: 20px; transform: translateY(-50%);">
+                    <MudFab Color="Color.Primary" 
+                           Icon="@Icons.Material.Filled.NavigateNext"
+                           Size="Size.Medium"
+                           OnClick="NextPage"
+                           Disabled="@(currentPage >= totalPages)"
+                           Style="opacity: 0.8;" />
+                </div>
+
+                <!-- Page navigation -->
+                <div style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);">
+                    <MudPaper Class="pa-2" Style="background: rgba(0,0,0,0.7); color: white;">
+                        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                            <MudIconButton Icon="@Icons.Material.Filled.FirstPage" 
+                                          Size="Size.Small"
+                                          OnClick="FirstPage"
+                                          Disabled="@(currentPage <= 1)" />
+                            <MudIconButton Icon="@Icons.Material.Filled.NavigateBefore" 
+                                          Size="Size.Small"
+                                          OnClick="PreviousPage"
+                                          Disabled="@(currentPage <= 1)" />
+                            
+                            <MudTextField @bind-Value="pageInput" 
+                                         @onkeypress="OnPageInputKeyPress"
+                                         Style="width: 80px; color: white;"
+                                         Variant="Variant.Text"
+                                         Margin="Margin.Dense" />
+                            
+                            <MudText>/ @totalPages</MudText>
+                            
+                            <MudIconButton Icon="@Icons.Material.Filled.NavigateNext" 
+                                          Size="Size.Small"
+                                          OnClick="NextPage"
+                                          Disabled="@(currentPage >= totalPages)" />
+                            <MudIconButton Icon="@Icons.Material.Filled.LastPage" 
+                                          Size="Size.Small"
+                                          OnClick="LastPage"
+                                          Disabled="@(currentPage >= totalPages)" />
+                        </MudStack>
+                    </MudPaper>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            @if (showSidebar)
+            {
+                <MudPaper Class="pa-0" Style="width: 400px; height: 100%; overflow-y: auto;">
+                    <MudTabs Elevation="0" Rounded="false" Centered="true" Color="Color.Primary">
+                        <!-- Book Info Tab -->
+                        <MudTabPanel Text="معلومات الكتاب" Icon="@Icons.Material.Filled.Info">
+                            <div class="pa-4">
+                                <MudStack Spacing="3">
+                                    <MudImage Src="@currentBook.ThumbnailUrl" 
+                                             Alt="@currentBook.Title"
+                                             Style="width: 100%; max-width: 200px; margin: 0 auto;" />
+                                    
+                                    <MudText Typo="Typo.h6" Align="Align.Center">@currentBook.Title</MudText>
+                                    <MudText Typo="Typo.subtitle1" Align="Align.Center" Color="Color.Secondary">
+                                        @currentBook.Author
+                                    </MudText>
+                                    
+                                    <MudDivider />
+                                    
+                                    <MudStack Row="true" Justify="Justify.SpaceBetween">
+                                        <MudText Typo="Typo.body2">الفئة:</MudText>
+                                        <MudText Typo="Typo.body2">@currentBook.CategoryNameArabic</MudText>
+                                    </MudStack>
+                                    
+                                    <MudStack Row="true" Justify="Justify.SpaceBetween">
+                                        <MudText Typo="Typo.body2">عدد الصفحات:</MudText>
+                                        <MudText Typo="Typo.body2">@currentBook.PageCount</MudText>
+                                    </MudStack>
+                                    
+                                    <MudStack Row="true" Justify="Justify.SpaceBetween">
+                                        <MudText Typo="Typo.body2">حجم الملف:</MudText>
+                                        <MudText Typo="Typo.body2">@currentBook.FormattedFileSize</MudText>
+                                    </MudStack>
+                                    
+                                    <MudStack Row="true" Justify="Justify.SpaceBetween">
+                                        <MudText Typo="Typo.body2">التقييم:</MudText>
+                                        <MudStack Row="true" AlignItems="AlignItems.Center">
+                                            <MudRating SelectedValue="@((int)currentBook.AverageRating)" ReadOnly="true" Size="Size.Small" />
+                                            <MudText Typo="Typo.caption">(@currentBook.TotalRatings)</MudText>
+                                        </MudStack>
+                                    </MudStack>
+                                    
+                                    @if (!string.IsNullOrEmpty(currentBook.Description))
+                                    {
+                                        <MudDivider />
+                                        <MudText Typo="Typo.body2">@currentBook.Description</MudText>
+                                    }
+                                    
+                                    <MudDivider />
+                                    
+                                    <!-- Action Buttons -->
+                                    <MudStack Spacing="2">
+                                        <MudButton Color="Color.Primary" 
+                                                  StartIcon="@(currentBook.IsLikedByCurrentUser ? Icons.Material.Filled.Favorite : Icons.Material.Filled.FavoriteBorder)"
+                                                  FullWidth="true"
+                                                  OnClick="ToggleLike">
+                                            @(currentBook.IsLikedByCurrentUser ? "إلغاء الإعجاب" : "إعجاب") (@currentBook.TotalLikes)
+                                        </MudButton>
+                                        
+                                        <MudButton Color="Color.Secondary" 
+                                                  StartIcon="@Icons.Material.Filled.Download"
+                                                  FullWidth="true"
+                                                  OnClick="DownloadBook">
+                                            تحميل الكتاب / Download
+                                        </MudButton>
+                                        
+                                        <MudButton Color="Color.Info" 
+                                                  StartIcon="@Icons.Material.Filled.Share"
+                                                  FullWidth="true"
+                                                  OnClick="ShareBook">
+                                            مشاركة الكتاب / Share
+                                        </MudButton>
+                                        
+                                        <MudButton Color="Color.Success" 
+                                                  StartIcon="@Icons.Material.Filled.Bookmark"
+                                                  FullWidth="true"
+                                                  OnClick="AddBookmark">
+                                            إضافة علامة مرجعية / Bookmark
+                                        </MudButton>
+                                    </MudStack>
+                                </MudStack>
+                            </div>
+                        </MudTabPanel>
+
+                        <!-- Bookmarks Tab -->
+                        <MudTabPanel Text="العلامات المرجعية" Icon="@Icons.Material.Filled.Bookmark">
+                            <div class="pa-4">
+                                <MudText Typo="Typo.h6" Class="mb-3">علاماتي المرجعية</MudText>
+                                
+                                @if (bookmarks?.Any() == true)
+                                {
+                                    @foreach (var bookmark in bookmarks)
+                                    {
+                                        <MudCard Class="mb-2" Elevation="1">
+                                            <MudCardContent Class="pa-2">
+                                                <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                                                    <div>
+                                                        <MudText Typo="Typo.body2">صفحة @bookmark.PageNumber</MudText>
+                                                        @if (!string.IsNullOrEmpty(bookmark.Note))
+                                                        {
+                                                            <MudText Typo="Typo.caption" Color="Color.Secondary">@bookmark.Note</MudText>
+                                                        }
+                                                    </div>
+                                                    <MudIconButton Icon="@Icons.Material.Filled.Launch" 
+                                                                  Size="Size.Small"
+                                                                  OnClick="@(() => GoToPage(bookmark.PageNumber))" />
+                                                </MudStack>
+                                            </MudCardContent>
+                                        </MudCard>
+                                    }
+                                }
+                                else
+                                {
+                                    <MudText Typo="Typo.body2" Class="text-center" Color="Color.Secondary">
+                                        لا توجد علامات مرجعية / No bookmarks
+                                    </MudText>
+                                }
+                            </div>
+                        </MudTabPanel>
+
+                        <!-- Comments Tab -->
+                        <MudTabPanel Text="التعليقات" Icon="@Icons.Material.Filled.Comment">
+                            <div class="pa-4">
+                                <MudText Typo="Typo.h6" Class="mb-3">تعليقات القراء</MudText>
+                                
+                                <!-- Add Comment -->
+                                @if (currentUser != null)
+                                {
+                                    <MudPaper Class="pa-3 mb-3" Elevation="1">
+                                        <MudTextField @bind-Value="newComment"
+                                                     Label="أضف تعليقاً"
+                                                     Multiline="true"
+                                                     Rows="3"
+                                                     FullWidth="true"
+                                                     Margin="Margin.Dense" />
+                                        <MudButton Color="Color.Primary" 
+                                                  Size="Size.Small"
+                                                  StartIcon="@Icons.Material.Filled.Send"
+                                                  OnClick="AddComment"
+                                                  Disabled="@string.IsNullOrWhiteSpace(newComment)"
+                                                  Class="mt-2">
+                                            إرسال التعليق
+                                        </MudButton>
+                                    </MudPaper>
+                                }
+
+                                <!-- Comments List -->
+                                @if (comments?.Any() == true)
+                                {
+                                    @foreach (var comment in comments.Take(10))
+                                    {
+                                        <MudCard Class="mb-2" Elevation="1">
+                                            <MudCardContent Class="pa-3">
+                                                <MudStack Spacing="1">
+                                                    <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                                                        <MudText Typo="Typo.subtitle2">@comment.UserFullName</MudText>
+                                                        <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                                            @comment.CreatedDate.ToString("dd/MM/yyyy")
+                                                        </MudText>
+                                                    </MudStack>
+                                                    <MudText Typo="Typo.body2">@comment.Content</MudText>
+                                                </MudStack>
+                                            </MudCardContent>
+                                        </MudCard>
+                                    }
+                                }
+                                else
+                                {
+                                    <MudText Typo="Typo.body2" Class="text-center" Color="Color.Secondary">
+                                        لا توجد تعليقات / No comments yet
+                                    </MudText>
+                                }
+                            </div>
+                        </MudTabPanel>
+
+                        <!-- Rating Tab -->
+                        <MudTabPanel Text="التقييم" Icon="@Icons.Material.Filled.Star">
+                            <div class="pa-4">
+                                <MudText Typo="Typo.h6" Class="mb-3">تقييم الكتاب</MudText>
+                                
+                                @if (currentUser != null)
+                                {
+                                    <MudPaper Class="pa-3 mb-3" Elevation="1">
+                                        <MudText Typo="Typo.body2" Class="mb-2">تقييمك للكتاب:</MudText>
+                                        <MudRating @bind-SelectedValue="userRating" 
+                                                  Size="Size.Large"
+                                                  Color="Color.Warning" />
+                                        <MudButton Color="Color.Primary" 
+                                                  Size="Size.Small"
+                                                  StartIcon="@Icons.Material.Filled.Star"
+                                                  OnClick="SubmitRating"
+                                                  Disabled="@(userRating == 0)"
+                                                  Class="mt-2">
+                                            إرسال التقييم
+                                        </MudButton>
+                                    </MudPaper>
+                                }
+
+                                <!-- Rating Summary -->
+                                <MudPaper Class="pa-3" Elevation="1">
+                                    <MudText Typo="Typo.subtitle1" Class="mb-2">ملخص التقييمات</MudText>
+                                    <MudStack Row="true" AlignItems="AlignItems.Center" Class="mb-2">
+                                        <MudRating SelectedValue="@((int)currentBook.AverageRating)" ReadOnly="true" Size="Size.Medium" />
+                                        <MudText Typo="Typo.h6">@currentBook.FormattedRating</MudText>
+                                        <MudText Typo="Typo.caption">(@currentBook.TotalRatings تقييم)</MudText>
+                                    </MudStack>
+                                </MudPaper>
+                            </div>
+                        </MudTabPanel>
+                    </MudTabs>
+                </MudPaper>
+            }
+        </div>
+    </MudContainer>
+}
+else if (isLoading)
+{
+    <MudContainer MaxWidth="MaxWidth.Medium" Class="pa-8 text-center">
+        <MudProgressCircular Indeterminate="true" Size="Size.Large" />
+        <MudText Typo="Typo.h6" Class="mt-4">جاري تحميل الكتاب... / Loading book...</MudText>
+    </MudContainer>
+}
+else
+{
+    <MudContainer MaxWidth="MaxWidth.Medium" Class="pa-8 text-center">
+        <MudIcon Icon="@Icons.Material.Filled.ErrorOutline" Size="Size.Large" Color="Color.Error" />
+        <MudText Typo="Typo.h6" Class="mt-4">الكتاب غير موجود / Book not found</MudText>
+        <MudButton Color="Color.Primary" OnClick="GoBack" Class="mt-4">العودة / Go Back</MudButton>
+    </MudContainer>
+}
+
+@code {
+    [Parameter] public int BookId { get; set; }
+
+    private BookDto currentBook;
+    private UserDto currentUser;
+    private bool isLoading = true;
+    private bool isLoadingPdf = false;
+    private bool showSidebar = true;
+    private bool isFullscreen = false;
+
+    // PDF viewer state
+    private int currentPage = 1;
+    private int totalPages = 1;
+    private int pageInput = 1;
+    private double zoomLevel = 1.0;
+    private int rotation = 0;
+
+    // Interactive features
+    private List<CommentDto> comments = new();
+    private List<BookmarkDto> bookmarks = new();
+    private string newComment = "";
+    private int userRating = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            isLoading = true;
+            StateHasChanged();
+
+            // Get current user
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            if (authState.User.Identity.IsAuthenticated)
+            {
+                // Load current user details
+                // currentUser = await UserService.GetCurrentUserAsync();
+            }
+
+            // Load book details
+            currentBook = await BookService.GetBookByIdAsync(BookId);
+            
+            if (currentBook != null)
+            {
+                // Track book view
+                await BookService.TrackUserActivityAsync(new UserActivityDto
+                {
+                    BookId = BookId,
+                    UserId = currentUser?.Id ?? 0,
+                    ActivityType = ActivityType.BookViewed
+                });
+
+                // Load comments and bookmarks
+                await LoadComments();
+                await LoadBookmarks();
+                
+                // Set user rating if available
+                userRating = currentBook.CurrentUserRating ?? 0;
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add("خطأ في تحميل الكتاب / Error loading book", Severity.Error);
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && currentBook != null)
+        {
+            await LoadPDF();
+        }
+    }
+
+    private async Task LoadPDF()
+    {
+        try
+        {
+            isLoadingPdf = true;
+            StateHasChanged();
+
+            await JSRuntime.InvokeVoidAsync("initializePDFViewer", currentBook.PdfFilePath);
+            
+            // Get total pages from PDF
+            totalPages = await JSRuntime.InvokeAsync<int>("getPDFPageCount");
+            pageInput = currentPage;
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add("خطأ في تحميل ملف PDF / Error loading PDF file", Severity.Error);
+        }
+        finally
+        {
+            isLoadingPdf = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task LoadComments()
+    {
+        comments = await BookService.GetBookCommentsAsync(BookId);
+    }
+
+    private async Task LoadBookmarks()
+    {
+        if (currentUser != null)
+        {
+            // bookmarks = await BookService.GetUserBookmarksAsync(currentUser.Id, BookId);
+        }
+    }
+
+    // PDF Navigation
+    private async Task NextPage()
+    {
+        if (currentPage < totalPages)
+        {
+            currentPage++;
+            pageInput = currentPage;
+            await JSRuntime.InvokeVoidAsync("goToPage", currentPage);
+            await TrackReadingProgress();
+        }
+    }
+
+    private async Task PreviousPage()
+    {
+        if (currentPage > 1)
+        {
+            currentPage--;
+            pageInput = currentPage;
+            await JSRuntime.InvokeVoidAsync("goToPage", currentPage);
+            await TrackReadingProgress();
+        }
+    }
+
+    private async Task FirstPage()
+    {
+        currentPage = 1;
+        pageInput = currentPage;
+        await JSRuntime.InvokeVoidAsync("goToPage", currentPage);
+    }
+
+    private async Task LastPage()
+    {
+        currentPage = totalPages;
+        pageInput = currentPage;
+        await JSRuntime.InvokeVoidAsync("goToPage", currentPage);
+    }
+
+    private async Task GoToPage(int page)
+    {
+        if (page >= 1 && page <= totalPages)
+        {
+            currentPage = page;
+            pageInput = currentPage;
+            await JSRuntime.InvokeVoidAsync("goToPage", currentPage);
+            await TrackReadingProgress();
+        }
+    }
+
+    private async Task OnPageInputKeyPress(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await GoToPage(pageInput);
+        }
+    }
+
+    // PDF Controls
+    private async Task ZoomIn()
+    {
+        if (zoomLevel < 3.0)
+        {
+            zoomLevel += 0.25;
+            await JSRuntime.InvokeVoidAsync("setZoom", zoomLevel);
+        }
+    }
+
+    private async Task ZoomOut()
+    {
+        if (zoomLevel > 0.5)
+        {
+            zoomLevel -= 0.25;
+            await JSRuntime.InvokeVoidAsync("setZoom", zoomLevel);
+        }
+    }
+
+    private async Task RotateLeft()
+    {
+        rotation -= 90;
+        await JSRuntime.InvokeVoidAsync("setRotation", rotation);
+    }
+
+    private async Task RotateRight()
+    {
+        rotation += 90;
+        await JSRuntime.InvokeVoidAsync("setRotation", rotation);
+    }
+
+    private async Task ToggleFullscreen()
+    {
+        isFullscreen = !isFullscreen;
+        await JSRuntime.InvokeVoidAsync("toggleFullscreen", isFullscreen);
+    }
+
+    // Interactive Features
+    private async Task ToggleLike()
+    {
+        if (currentUser == null)
+        {
+            Snackbar.Add("يرجى تسجيل الدخول أولاً / Please login first", Severity.Warning);
+            return;
+        }
+
+        var isLiked = await BookService.ToggleLikeAsync(BookId, currentUser.Id);
+        currentBook.IsLikedByCurrentUser = isLiked;
+        currentBook.TotalLikes += isLiked ? 1 : -1;
+        
+        StateHasChanged();
+        Snackbar.Add(isLiked ? "تم الإعجاب بالكتاب" : "تم إلغاء الإعجاب", Severity.Success);
+    }
+
+    private async Task AddComment()
+    {
+        if (currentUser == null || string.IsNullOrWhiteSpace(newComment))
+            return;
+
+        var commentDto = new CreateCommentDto
+        {
+            Content = newComment.Trim(),
+            BookId = BookId,
+            UserId = currentUser.Id
+        };
+
+        var addedComment = await BookService.AddCommentAsync(commentDto);
+        comments.Insert(0, addedComment);
+        newComment = "";
+        
+        StateHasChanged();
+        Snackbar.Add("تم إضافة التعليق بنجاح", Severity.Success);
+    }
+
+    private async Task SubmitRating()
+    {
+        if (currentUser == null || userRating == 0)
+            return;
+
+        var ratingDto = new CreateRatingDto
+        {
+            Value = userRating,
+            BookId = BookId,
+            UserId = currentUser.Id
+        };
+
+        await BookService.AddOrUpdateRatingAsync(ratingDto);
+        currentBook.CurrentUserRating = userRating;
+        
+        // Refresh book to get updated average rating
+        currentBook = await BookService.GetBookByIdAsync(BookId);
+        
+        StateHasChanged();
+        Snackbar.Add("تم إرسال التقييم بنجاح", Severity.Success);
+    }
+
+    private async Task AddBookmark()
+    {
+        if (currentUser == null)
+        {
+            Snackbar.Add("يرجى تسجيل الدخول أولاً / Please login first", Severity.Warning);
+            return;
+        }
+
+        // Implementation for adding bookmark
+        Snackbar.Add($"تم إضافة علامة مرجعية للصفحة {currentPage}", Severity.Success);
+    }
+
+    private async Task DownloadBook()
+    {
+        await BookService.TrackUserActivityAsync(new UserActivityDto
+        {
+            BookId = BookId,
+            UserId = currentUser?.Id ?? 0,
+            ActivityType = ActivityType.BookDownloaded
+        });
+
+        await JSRuntime.InvokeVoidAsync("downloadFile", currentBook.PdfFilePath, $"{currentBook.Title}.pdf");
+        Snackbar.Add("بدء تحميل الكتاب / Download started", Severity.Success);
+    }
+
+    private async Task ShareBook()
+    {
+        var url = Navigation.Uri;
+        await JSRuntime.InvokeVoidAsync("copyToClipboard", url);
+        Snackbar.Add("تم نسخ رابط الكتاب / Book link copied", Severity.Success);
+    }
+
+    private async Task TrackReadingProgress()
+    {
+        if (currentUser != null)
+        {
+            await BookService.TrackUserActivityAsync(new UserActivityDto
+            {
+                BookId = BookId,
+                UserId = currentUser.Id,
+                ActivityType = ActivityType.ReadingProgress,
+                PageNumber = currentPage,
+                AdditionalData = $"Page {currentPage} of {totalPages}"
+            });
+        }
+    }
+
+    private void ToggleSidebar()
+    {
+        showSidebar = !showSidebar;
+        StateHasChanged();
+    }
+
+    private void GoBack()
+    {
+        Navigation.NavigateTo($"/book/{BookId}");
+    }
+}
+
+<!-- JavaScript for PDF.js integration -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+    let pdfDoc = null;
+    let pageNum = 1;
+    let pageRendering = false;
+    let pageNumPending = null;
+    let scale = 1.0;
+    let rotation = 0;
+    const canvas = document.getElementById('pdf-canvas');
+    const ctx = canvas.getContext('2d');
+
+    window.initializePDFViewer = async function(url) {
+        try {
+            const loadingTask = pdfjsLib.getDocument(url);
+            pdfDoc = await loadingTask.promise;
+            
+            // Render the first page
+            renderPage(pageNum);
+            return pdfDoc.numPages;
+        } catch (error) {
+            console.error('Error loading PDF:', error);
+            throw error;
+        }
+    };
+
+    window.getPDFPageCount = function() {
+        return pdfDoc ? pdfDoc.numPages : 0;
+    };
+
+    window.goToPage = function(num) {
+        pageNum = num;
+        renderPage(pageNum);
+    };
+
+    window.setZoom = function(newScale) {
+        scale = newScale;
+        renderPage(pageNum);
+    };
+
+    window.setRotation = function(newRotation) {
+        rotation = newRotation;
+        renderPage(pageNum);
+    };
+
+    window.toggleFullscreen = function(enable) {
+        const container = document.getElementById('pdf-container');
+        if (enable) {
+            if (container.requestFullscreen) {
+                container.requestFullscreen();
+            }
+        } else {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            }
+        }
+    };
+
+    function renderPage(num) {
+        if (pageRendering) {
+            pageNumPending = num;
+            return;
+        }
+        
+        pageRendering = true;
+
+        pdfDoc.getPage(num).then(function(page) {
+            const viewport = page.getViewport({ scale: scale, rotation: rotation });
+            
+            canvas.height = viewport.height;
+            canvas.width = viewport.width;
+
+            const renderContext = {
+                canvasContext: ctx,
+                viewport: viewport
+            };
+            
+            const renderTask = page.render(renderContext);
+            
+            renderTask.promise.then(function() {
+                pageRendering = false;
+                if (pageNumPending !== null) {
+                    renderPage(pageNumPending);
+                    pageNumPending = null;
+                }
+            });
+        });
+    }
+
+    window.downloadFile = function(url, filename) {
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    };
+
+    window.copyToClipboard = function(text) {
+        navigator.clipboard.writeText(text);
+    };
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        if (e.target.tagName.toLowerCase() === 'input') return;
+        
+        switch(e.key) {
+            case 'ArrowLeft':
+                window.goToPage(Math.max(1, pageNum - 1));
+                break;
+            case 'ArrowRight':
+                window.goToPage(Math.min(pdfDoc.numPages, pageNum + 1));
+                break;
+            case '+':
+                window.setZoom(Math.min(3.0, scale + 0.25));
+                break;
+            case '-':
+                window.setZoom(Math.max(0.5, scale - 0.25));
+                break;
+            case 'f':
+                window.toggleFullscreen(true);
+                break;
+            case 'Escape':
+                window.toggleFullscreen(false);
+                break;
+        }
+    });
+</script>
+
+<style>
+    #pdf-canvas {
+        box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        background: white;
+        margin: 20px auto;
+    }
+    
+    .mud-tabs .mud-tab-panel {
+        padding: 0;
+    }
+</style>

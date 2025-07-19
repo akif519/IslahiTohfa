@@ -1,0 +1,544 @@
+﻿@page "/admin/dashboard"
+@using IslahiTohfa.Application.DTOs
+@using IslahiTohfa.Application.Services
+@using IslahiTohfa.Domain.Enums
+@attribute [Authorize(Roles = "Admin")]
+@inject IBookService BookService
+@inject IUserService UserService
+@inject IAnalyticsService AnalyticsService
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+@inject NavigationManager Navigation
+
+<PageTitle>لوحة التحكم الإدارية - Islahi Tohfa Admin Dashboard</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="pa-4">
+    <!-- Header -->
+    <MudGrid Class="mb-6">
+        <MudItem xs="12">
+            <MudText Typo="Typo.h3" Color="Color.Primary" Class="mb-2">
+                <MudIcon Icon="@Icons.Material.Filled.Dashboard" Class="mr-2" />
+                لوحة التحكم الإدارية / Admin Dashboard
+            </MudText>
+            <MudText Typo="Typo.body1" Color="Color.Secondary">
+                إدارة الكتب والمستخدمين ومراقبة الأنشطة / Manage books, users, and monitor activities
+            </MudText>
+        </MudItem>
+    </MudGrid>
+
+    <!-- Loading Indicator -->
+    @if (isLoading)
+    {
+        <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="mb-4" />
+    }
+
+    <!-- Statistics Cards -->
+    <MudGrid Class="mb-6">
+        <MudItem xs="12" sm="6" md="3">
+            <MudCard Class="stat-card" Style="background: linear-gradient(135deg, #1B7332 0%, #22a83a 100%);">
+                <MudCardContent Class="text-center" Style="color: white;">
+                    <MudIcon Icon="@Icons.Material.Filled.MenuBook" Size="Size.Large" Class="mb-2" />
+                    <MudText Typo="Typo.h4">@dashboardData?.SiteStatistics?.TotalBooks</MudText>
+                    <MudText Typo="Typo.body2">إجمالي الكتب / Total Books</MudText>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+        
+        <MudItem xs="12" sm="6" md="3">
+            <MudCard Class="stat-card" Style="background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);">
+                <MudCardContent Class="text-center" Style="color: white;">
+                    <MudIcon Icon="@Icons.Material.Filled.People" Size="Size.Large" Class="mb-2" />
+                    <MudText Typo="Typo.h4">@dashboardData?.SiteStatistics?.TotalUsers</MudText>
+                    <MudText Typo="Typo.body2">إجمالي المستخدمين / Total Users</MudText>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+        
+        <MudItem xs="12" sm="6" md="3">
+            <MudCard Class="stat-card" Style="background: linear-gradient(135deg, #DAA520 0%, #fbbf24 100%);">
+                <MudCardContent Class="text-center" Style="color: white;">
+                    <MudIcon Icon="@Icons.Material.Filled.Download" Size="Size.Large" Class="mb-2" />
+                    <MudText Typo="Typo.h4">@dashboardData?.SiteStatistics?.TotalDownloads</MudText>
+                    <MudText Typo="Typo.body2">إجمالي التحميلات / Total Downloads</MudText>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+        
+        <MudItem xs="12" sm="6" md="3">
+            <MudCard Class="stat-card" Style="background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);">
+                <MudCardContent Class="text-center" Style="color: white;">
+                    <MudIcon Icon="@Icons.Material.Filled.Visibility" Size="Size.Large" Class="mb-2" />
+                    <MudText Typo="Typo.h4">@dashboardData?.SiteStatistics?.TotalViews</MudText>
+                    <MudText Typo="Typo.body2">إجمالي المشاهدات / Total Views</MudText>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+    </MudGrid>
+
+    <!-- Quick Actions -->
+    <MudPaper Class="pa-4 mb-6" Elevation="2">
+        <MudText Typo="Typo.h5" Class="mb-3" Color="Color.Primary">
+            <MudIcon Icon="@Icons.Material.Filled.FlashOn" Class="mr-2" />
+            الإجراءات السريعة / Quick Actions
+        </MudText>
+        <MudGrid>
+            <MudItem xs="12" sm="6" md="3">
+                <MudButton Color="Color.Primary" 
+                          StartIcon="@Icons.Material.Filled.Add"
+                          FullWidth="true"
+                          Size="Size.Large"
+                          OnClick="OpenAddBookDialog">
+                    إضافة كتاب جديد / Add New Book
+                </MudButton>
+            </MudItem>
+            <MudItem xs="12" sm="6" md="3">
+                <MudButton Color="Color.Secondary" 
+                          StartIcon="@Icons.Material.Filled.Category"
+                          FullWidth="true"
+                          Size="Size.Large"
+                          OnClick="NavigateToCategories">
+                    إدارة الفئات / Manage Categories
+                </MudButton>
+            </MudItem>
+            <MudItem xs="12" sm="6" md="3">
+                <MudButton Color="Color.Info" 
+                          StartIcon="@Icons.Material.Filled.People"
+                          FullWidth="true"
+                          Size="Size.Large"
+                          OnClick="NavigateToUsers">
+                    إدارة المستخدمين / Manage Users
+                </MudButton>
+            </MudItem>
+            <MudItem xs="12" sm="6" md="3">
+                <MudButton Color="Color.Success" 
+                          StartIcon="@Icons.Material.Filled.Analytics"
+                          FullWidth="true"
+                          Size="Size.Large"
+                          OnClick="NavigateToAnalytics">
+                    التقارير التفصيلية / Detailed Analytics
+                </MudButton>
+            </MudItem>
+        </MudGrid>
+    </MudPaper>
+
+    <MudGrid>
+        <!-- Popular Books -->
+        <MudItem xs="12" md="6">
+            <MudPaper Class="pa-4" Elevation="2" Style="height: 400px;">
+                <MudText Typo="Typo.h6" Class="mb-3" Color="Color.Primary">
+                    <MudIcon Icon="@Icons.Material.Filled.TrendingUp" Class="mr-2" />
+                    الكتب الأكثر شعبية / Popular Books
+                </MudText>
+                
+                @if (dashboardData?.PopularBooks?.Any() == true)
+                {
+                    <div style="height: 320px; overflow-y: auto;">
+                        @foreach (var book in dashboardData.PopularBooks.Take(8))
+                        {
+                            <MudCard Class="mb-2" Elevation="1">
+                                <MudCardContent Class="pa-3">
+                                    <MudGrid AlignItems="Center">
+                                        <MudItem xs="2">
+                                            <MudImage Src="@book.ThumbnailUrl" 
+                                                     Alt="@book.Title"
+                                                     Style="width: 40px; height: 50px; object-fit: cover;" />
+                                        </MudItem>
+                                        <MudItem xs="8">
+                                            <MudText Typo="Typo.body2" Class="font-weight-medium">@book.Title</MudText>
+                                            <MudText Typo="Typo.caption" Color="Color.Secondary">@book.Author</MudText>
+                                        </MudItem>
+                                        <MudItem xs="2" Class="text-center">
+                                            <MudText Typo="Typo.caption" Color="Color.Primary">@book.ViewCount</MudText>
+                                            <MudText Typo="Typo.caption">مشاهدة</MudText>
+                                        </MudItem>
+                                    </MudGrid>
+                                </MudCardContent>
+                            </MudCard>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <MudText Typo="Typo.body2" Class="text-center mt-8" Color="Color.Secondary">
+                        لا توجد بيانات متاحة / No data available
+                    </MudText>
+                }
+            </MudPaper>
+        </MudItem>
+
+        <!-- Recent Activity -->
+        <MudItem xs="12" md="6">
+            <MudPaper Class="pa-4" Elevation="2" Style="height: 400px;">
+                <MudText Typo="Typo.h6" Class="mb-3" Color="Color.Primary">
+                    <MudIcon Icon="@Icons.Material.Filled.Timeline" Class="mr-2" />
+                    النشاط الحديث / Recent Activity
+                </MudText>
+                
+                @if (dashboardData?.RecentComments?.Any() == true)
+                {
+                    <div style="height: 320px; overflow-y: auto;">
+                        @foreach (var comment in dashboardData.RecentComments.Take(6))
+                        {
+                            <MudCard Class="mb-2" Elevation="1">
+                                <MudCardContent Class="pa-3">
+                                    <MudText Typo="Typo.body2" Class="mb-1">
+                                        <strong>@comment.UserFullName</strong> علق على 
+                                        <MudLink Href="@($"/book/{comment.BookId}")">@comment.BookTitle</MudLink>
+                                    </MudText>
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary" Class="mb-2">
+                                        @comment.CreatedDate.ToString("dd/MM/yyyy HH:mm")
+                                    </MudText>
+                                    <MudText Typo="Typo.caption" Class="text-truncate">
+                                        "@comment.Content"
+                                    </MudText>
+                                </MudCardContent>
+                            </MudCard>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <MudText Typo="Typo.body2" Class="text-center mt-8" Color="Color.Secondary">
+                        لا توجد أنشطة حديثة / No recent activity
+                    </MudText>
+                }
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+
+    <!-- Charts Section -->
+    <MudGrid Class="mt-6">
+        <!-- Daily Activities Chart -->
+        <MudItem xs="12" md="8">
+            <MudPaper Class="pa-4" Elevation="2">
+                <MudText Typo="Typo.h6" Class="mb-3" Color="Color.Primary">
+                    <MudIcon Icon="@Icons.Material.Filled.BarChart" Class="mr-2" />
+                    الأنشطة اليومية / Daily Activities (Last 30 Days)
+                </MudText>
+                
+                @if (dashboardData?.DailyActivities?.Any() == true)
+                {
+                    <div style="height: 300px;">
+                        <MudChart ChartType="ChartType.Line" 
+                                 ChartSeries="@chartSeries" 
+                                 XAxisLabels="@chartLabels" 
+                                 Width="100%" 
+                                 Height="280px"
+                                 ChartOptions="@chartOptions" />
+                    </div>
+                }
+                else
+                {
+                    <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="300px" />
+                }
+            </MudPaper>
+        </MudItem>
+
+        <!-- Category Distribution -->
+        <MudItem xs="12" md="4">
+            <MudPaper Class="pa-4" Elevation="2">
+                <MudText Typo="Typo.h6" Class="mb-3" Color="Color.Primary">
+                    <MudIcon Icon="@Icons.Material.Filled.PieChart" Class="mr-2" />
+                    توزيع الفئات / Category Distribution
+                </MudText>
+                
+                @if (categoryData?.Any() == true)
+                {
+                    <div style="height: 300px;">
+                        <MudChart ChartType="ChartType.Donut" 
+                                 InputData="@categoryData.Select(x => (double)x).ToArray()" 
+                                 InputLabels="@categoryLabels"
+                                 Width="100%" 
+                                 Height="280px" />
+                    </div>
+                }
+                else
+                {
+                    <MudSkeleton SkeletonType="SkeletonType.Circle" Height="280px" />
+                }
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+
+    <!-- Recent Books Management -->
+    <MudPaper Class="pa-4 mt-6" Elevation="2">
+        <MudGrid AlignItems="Center" Class="mb-3">
+            <MudItem xs="6">
+                <MudText Typo="Typo.h6" Color="Color.Primary">
+                    <MudIcon Icon="@Icons.Material.Filled.LibraryBooks" Class="mr-2" />
+                    إدارة الكتب / Books Management
+                </MudText>
+            </MudItem>
+            <MudItem xs="6" Class="text-right">
+                <MudButton Color="Color.Primary" 
+                          StartIcon="@Icons.Material.Filled.Add"
+                          OnClick="OpenAddBookDialog">
+                    إضافة كتاب / Add Book
+                </MudButton>
+            </MudItem>
+        </MudGrid>
+
+        <MudDataGrid Items="@recentBooks" 
+                    ReadOnly="false" 
+                    Elevation="0"
+                    Striped="true"
+                    FixedHeader="true"
+                    Height="400px">
+            <Columns>
+                <PropertyColumn Property="x => x.Title" Title="العنوان / Title" />
+                <PropertyColumn Property="x => x.Author" Title="المؤلف / Author" />
+                <PropertyColumn Property="x => x.CategoryName" Title="الفئة / Category" />
+                <PropertyColumn Property="x => x.Status" Title="الحالة / Status">
+                    <CellTemplate>
+                        <MudChip Color="@GetStatusColor(context.Item.Status)" 
+                                Size="Size.Small">
+                            @GetStatusText(context.Item.Status)
+                        </MudChip>
+                    </CellTemplate>
+                </PropertyColumn>
+                <PropertyColumn Property="x => x.ViewCount" Title="المشاهدات / Views" />
+                <PropertyColumn Property="x => x.AverageRating" Title="التقييم / Rating">
+                    <CellTemplate>
+                        <MudRating SelectedValue="@((int)context.Item.AverageRating)" 
+                                  ReadOnly="true" 
+                                  Size="Size.Small" />
+                    </CellTemplate>
+                </PropertyColumn>
+                <TemplateColumn Title="الإجراءات / Actions" Sortable="false">
+                    <CellTemplate>
+                        <MudStack Row="true" Spacing="1">
+                            <MudIconButton Icon="@Icons.Material.Filled.Edit" 
+                                          Size="Size.Small" 
+                                          Color="Color.Primary"
+                                          OnClick="@(() => EditBook(context.Item.Id))" />
+                            <MudIconButton Icon="@Icons.Material.Filled.Visibility" 
+                                          Size="Size.Small" 
+                                          Color="Color.Info"
+                                          OnClick="@(() => ViewBook(context.Item.Id))" />
+                            <MudIconButton Icon="@Icons.Material.Filled.Delete" 
+                                          Size="Size.Small" 
+                                          Color="Color.Error"
+                                          OnClick="@(() => DeleteBook(context.Item.Id))" />
+                        </MudStack>
+                    </CellTemplate>
+                </TemplateColumn>
+            </Columns>
+        </MudDataGrid>
+    </MudPaper>
+</MudContainer>
+
+<style>
+    .stat-card {
+        transition: transform 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .text-truncate {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+</style>
+
+@code {
+    private bool isLoading = true;
+    private DashboardSummaryDto dashboardData = new();
+    private List<BookDto> recentBooks = new();
+    
+    // Chart data
+    private List<ChartSeries> chartSeries = new();
+    private string[] chartLabels = Array.Empty<string>();
+    private ChartOptions chartOptions = new();
+    private List<int> categoryData = new();
+    private string[] categoryLabels = Array.Empty<string>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            isLoading = true;
+            StateHasChanged();
+
+            await LoadDashboardData();
+            await LoadRecentBooks();
+            await LoadChartData();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add("حدث خطأ في تحميل بيانات لوحة التحكم / Error loading dashboard data", Severity.Error);
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task LoadDashboardData()
+    {
+        dashboardData = await AnalyticsService.GetDashboardSummaryAsync();
+    }
+
+    private async Task LoadRecentBooks()
+    {
+        var searchCriteria = new BookSearchCriteria
+        {
+            PageNumber = 1,
+            PageSize = 10,
+            SortBy = SortOrder.CreatedDate,
+            SortDirection = SortDirection.Descending
+        };
+        
+        var result = await BookService.SearchBooksAsync(searchCriteria);
+        recentBooks = result.Items;
+    }
+
+    private async Task LoadChartData()
+    {
+        if (dashboardData?.DailyActivities?.Any() == true)
+        {
+            chartLabels = dashboardData.DailyActivities
+                .OrderBy(x => x.Date)
+                .Select(x => x.Date.ToString("dd/MM"))
+                .ToArray();
+
+            chartSeries = new List<ChartSeries>
+            {
+                new ChartSeries
+                {
+                    Name = "المشاهدات / Views",
+                    Data = dashboardData.DailyActivities
+                        .OrderBy(x => x.Date)
+                        .Select(x => (double)x.Count)
+                        .ToArray()
+                }
+            };
+
+            chartOptions = new ChartOptions
+            {
+                YAxisTicks = 5,
+                MaxNumYAxisTicks = 10,
+                YAxisFormat = "0.##",
+                LineStrokeWidth = 3
+            };
+        }
+
+        // Load category distribution
+        var categories = await BookService.GetCategoriesWithBookCountAsync();
+        categoryData = categories.Select(c => c.BookCount).ToList();
+        categoryLabels = categories.Select(c => c.NameArabic ?? c.Name).ToArray();
+    }
+
+    private async Task OpenAddBookDialog()
+    {
+        var parameters = new DialogParameters();
+        var options = new DialogOptions
+        {
+            CloseButton = true,
+            MaxWidth = MaxWidth.Medium,
+            FullWidth = true
+        };
+
+        var dialog = await DialogService.ShowAsync<AddEditBookDialog>("إضافة كتاب جديد / Add New Book", parameters, options);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            await LoadRecentBooks();
+            await LoadDashboardData();
+            Snackbar.Add("تم إضافة الكتاب بنجاح / Book added successfully", Severity.Success);
+        }
+    }
+
+    private async Task EditBook(int bookId)
+    {
+        var parameters = new DialogParameters { ["BookId"] = bookId };
+        var options = new DialogOptions
+        {
+            CloseButton = true,
+            MaxWidth = MaxWidth.Medium,
+            FullWidth = true
+        };
+
+        var dialog = await DialogService.ShowAsync<AddEditBookDialog>("تعديل الكتاب / Edit Book", parameters, options);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            await LoadRecentBooks();
+            Snackbar.Add("تم تحديث الكتاب بنجاح / Book updated successfully", Severity.Success);
+        }
+    }
+
+    private void ViewBook(int bookId)
+    {
+        Navigation.NavigateTo($"/book/{bookId}");
+    }
+
+    private async Task DeleteBook(int bookId)
+    {
+        var result = await DialogService.ShowMessageBox(
+            "تأكيد الحذف / Confirm Delete",
+            "هل أنت متأكد من حذف هذا الكتاب؟ / Are you sure you want to delete this book?",
+            yesText: "نعم / Yes",
+            cancelText: "إلغاء / Cancel");
+
+        if (result == true)
+        {
+            var success = await BookService.DeleteBookAsync(bookId);
+            if (success)
+            {
+                await LoadRecentBooks();
+                await LoadDashboardData();
+                Snackbar.Add("تم حذف الكتاب بنجاح / Book deleted successfully", Severity.Success);
+            }
+            else
+            {
+                Snackbar.Add("فشل في حذف الكتاب / Failed to delete book", Severity.Error);
+            }
+        }
+    }
+
+    private void NavigateToCategories()
+    {
+        Navigation.NavigateTo("/admin/categories");
+    }
+
+    private void NavigateToUsers()
+    {
+        Navigation.NavigateTo("/admin/users");
+    }
+
+    private void NavigateToAnalytics()
+    {
+        Navigation.NavigateTo("/admin/analytics");
+    }
+
+    private Color GetStatusColor(BookStatus status)
+    {
+        return status switch
+        {
+            BookStatus.Published => Color.Success,
+            BookStatus.Draft => Color.Warning,
+            BookStatus.UnderReview => Color.Info,
+            BookStatus.Archived => Color.Error,
+            _ => Color.Default
+        };
+    }
+
+    private string GetStatusText(BookStatus status)
+    {
+        return status switch
+        {
+            BookStatus.Published => "منشور / Published",
+            BookStatus.Draft => "مسودة / Draft",
+            BookStatus.UnderReview => "قيد المراجعة / Under Review",
+            BookStatus.Archived => "مؤرشف / Archived",
+            _ => status.ToString()
+        };
+    }
+}
