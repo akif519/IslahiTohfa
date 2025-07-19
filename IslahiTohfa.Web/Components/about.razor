@@ -1,0 +1,308 @@
+﻿@page "/about"
+@using IsladebhiTohfa.Application.DTOs
+
+<PageTitle>حول الموقع - About Islahi Tohfa</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="pa-4">
+    <!-- Hero Section -->
+    <MudPaper Class="pa-8 mb-6" Elevation="3" Style="background: linear-gradient(135deg, #1B7332 0%, #22a83a 100%); color: white; text-align: center;">
+        <MudStack AlignItems="AlignItems.Center" Spacing="4">
+            <MudImage Src="/images/islahi-tohfa-logo.png" 
+                     Alt="Islahi Tohfa Logo" 
+                     Style="height: 120px; filter: brightness(0) invert(1);" />
+            <MudText Typo="Typo.h3" Class="font-weight-bold">
+                حول الإصلاحي تحفة
+            </MudText>
+            <MudText Typo="Typo.h4">
+                About Islahi Tohfa
+            </MudText>
+            <MudText Typo="Typo.h6" Style="max-width: 800px;">
+                منصة تعليمية إسلامية تهدف إلى نشر المعرفة النافعة والكتب الإسلامية لخدمة الأمة الإسلامية في جميع أنحاء العالم
+            </MudText>
+            <MudText Typo="Typo.subtitle1" Style="max-width: 800px;">
+                An Islamic educational platform dedicated to spreading beneficial knowledge and Islamic books to serve the Muslim Ummah worldwide
+            </MudText>
+        </MudStack>
+    </MudPaper>
+
+    <!-- Mission and Vision -->
+    <MudGrid Class="mb-8">
+        <MudItem xs="12" md="6">
+            <MudPaper Class="pa-6" Elevation="2" Style="height: 100%;">
+                <MudStack Spacing="3">
+                    <MudStack Row="true" AlignItems="AlignItems.Center">
+                        <MudIcon Icon="@Icons.Material.Filled.FlagCircle" 
+                                Size="Size.Large" 
+                                Color="Color.Primary" />
+                        <MudText Typo="Typo.h5" Color="Color.Primary">
+                            رسالتنا / Our Mission
+                        </MudText>
+                    </MudStack>
+                    <MudText Typo="Typo.body1" Style="text-align: justify;">
+                        نسعى لتوفير منصة رقمية شاملة ومجانية تجمع أفضل الكتب الإسلامية التعليمية، 
+                        لتكون مرجعاً موثوقاً للطلاب والباحثين وعموم المسلمين في طلب العلم الشرعي. 
+                        نهدف إلى جعل المعرفة الإسلامية في متناول الجميع بطريقة عصرية وسهلة الوصول.
+                    </MudText>
+                    <MudText Typo="Typo.body2" Style="text-align: justify;">
+                        We strive to provide a comprehensive and free digital platform that brings together 
+                        the best Islamic educational books, serving as a trusted reference for students, 
+                        researchers, and Muslims in general seeking Islamic knowledge. We aim to make 
+                        Islamic knowledge accessible to everyone in a modern and easily accessible way.
+                    </MudText>
+                </MudStack>
+            </MudPaper>
+        </MudItem>
+
+        <MudItem xs="12" md="6">
+            <MudPaper Class="pa-6" Elevation="2" Style="height: 100%;">
+                <MudStack Spacing="3">
+                    <MudStack Row="true" AlignItems="AlignItems.Center">
+                        <MudIcon Icon="@Icons.Material.Filled.Visibility" 
+                                Size="Size.Large" 
+                                Color="Color.Secondary" />
+                        <MudText Typo="Typo.h5" Color="Color.Secondary">
+                            رؤيتنا / Our Vision
+                        </MudText>
+                    </MudStack>
+                    <MudText Typo="Typo.body1" Style="text-align: justify;">
+                        أن نكون المنصة الرائدة عالمياً في نشر التعليم الإسلامي الرقمي، 
+                        ونساهم في بناء جيل واعٍ ومثقف يحمل رسالة الإسلام الحضارية للعالم. 
+                        نتطلع إلى مستقبل يكون فيه العلم الشرعي متاحاً لكل مسلم في أي مكان وزمان.
+                    </MudText>
+                    <MudText Typo="Typo.body2" Style="text-align: justify;">
+                        To be the world's leading platform in digital Islamic education, contributing 
+                        to building an aware and educated generation that carries Islam's civilizational 
+                        message to the world. We envision a future where Islamic knowledge is available 
+                        to every Muslim anywhere and anytime.
+                    </MudText>
+                </MudStack>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+
+    <!-- Our Values -->
+    <MudText Typo="Typo.h4" Color="Color.Primary" Class="mb-4 text-center">
+        <MudIcon Icon="@Icons.Material.Filled.Diamond" Class="mr-2" />
+        قيمنا / Our Values
+    </MudText>
+
+    <MudGrid Class="mb-8">
+        <MudItem xs="12" sm="6" md="3">
+            <MudPaper Class="pa-4 text-center" Elevation="2" Style="height: 100%;">
+                <MudIcon Icon="@Icons.Material.Filled.MenuBook" 
+                        Size="Size.Large" 
+                        Color="Color.Primary" 
+                        Class="mb-3" />
+                <MudText Typo="Typo.h6" Class="mb-2">العلم النافع</MudText>
+                <MudText Typo="Typo.body2">
+                    نركز على نشر العلم النافع الذي يفيد المسلم في دينه ودنياه
+                </MudText>
+                <MudText Typo="Typo.caption" Color="Color.Secondary">
+                    Beneficial Knowledge
+                </MudText>
+            </MudPaper>
+        </MudItem>
+
+        <MudItem xs="12" sm="6" md="3">
+            <MudPaper Class="pa-4 text-center" Elevation="2" Style="height: 100%;">
+                <MudIcon Icon="@Icons.Material.Filled.VerifiedUser" 
+                        Size="Size.Large" 
+                        Color="Color.Success" 
+                        Class="mb-3" />
+                <MudText Typo="Typo.h6" Class="mb-2">الموثوقية</MudText>
+                <MudText Typo="Typo.body2">
+                    نلتزم بنشر المحتوى الموثوق من علماء معتبرين ومصادر صحيحة
+                </MudText>
+                <MudText Typo="Typo.caption" Color="Color.Secondary">
+                    Authenticity
+                </MudText>
+            </MudPaper>
+        </MudItem>
+
+        <MudItem xs="12" sm="6" md="3">
+            <MudPaper Class="pa-4 text-center" Elevation="2" Style="height: 100%;">
+                <MudIcon Icon="@Icons.Material.Filled.Public" 
+                        Size="Size.Large" 
+                        Color="Color.Info" 
+                        Class="mb-3" />
+                <MudText Typo="Typo.h6" Class="mb-2">الوصول المجاني</MudText>
+                <MudText Typo="Typo.body2">
+                    نؤمن بحق كل مسلم في الوصول المجاني للمعرفة الإسلامية
+                </MudText>
+                <MudText Typo="Typo.caption" Color="Color.Secondary">
+                    Free Access
+                </MudText>
+            </MudPaper>
+        </MudItem>
+
+        <MudItem xs="12" sm="6" md="3">
+            <MudPaper Class="pa-4 text-center" Elevation="2" Style="height: 100%;">
+                <MudIcon Icon="@Icons.Material.Filled.Innovation" 
+                        Size="Size.Large" 
+                        Color="Color.Warning" 
+                        Class="mb-3" />
+                <MudText Typo="Typo.h6" Class="mb-2">التطوير المستمر</MudText>
+                <MudText Typo="Typo.body2">
+                    نسعى لتطوير التقنيات لتحسين تجربة التعلم الإسلامي
+                </MudText>
+                <MudText Typo="Typo.caption" Color="Color.Secondary">
+                    Innovation
+                </MudText>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+
+    <!-- What We Offer -->
+    <MudText Typo="Typo.h4" Color="Color.Primary" Class="mb-4 text-center">
+        <MudIcon Icon="@Icons.Material.Filled.Star" Class="mr-2" />
+        ما نقدمه / What We Offer
+    </MudText>
+
+    <MudGrid Class="mb-8">
+        <MudItem xs="12" md="8">
+            <MudList>
+                <MudListItem Icon="@Icons.Material.Filled.LibraryBooks">
+                    <MudListItemText Primary="مكتبة شاملة من الكتب الإسلامية" 
+                                    Secondary="مجموعة واسعة من الكتب في العقيدة والفقه والحديث والتفسير وغيرها" />
+                </MudListItem>
+                <MudListItem Icon="@Icons.Material.Filled.Search">
+                    <MudListItemText Primary="بحث متقدم وفلترة ذكية" 
+                                    Secondary="نظام بحث قوي للعثور على الكتب المناسبة بسرعة وسهولة" />
+                </MudListItem>
+                <MudListItem Icon="@Icons.Material.Filled.DevicesOther">
+                    <MudListItemText Primary="قراءة على جميع الأجهزة" 
+                                    Secondary="منصة متوافقة مع الحاسوب والهاتف المحمول واللوحي" />
+                </MudListItem>
+                <MudListItem Icon="@Icons.Material.Filled.Bookmark">
+                    <MudListItemText Primary="علامات مرجعية وملاحظات" 
+                                    Secondary="حفظ التقدم وإضافة الملاحظات الشخصية" />
+                </MudListItem>
+                <MudListItem Icon="@Icons.Material.Filled.Forum">
+                    <MudListItemText Primary="مناقشات وتعليقات" 
+                                    Secondary="تفاعل مع القراء الآخرين ومناقشة المحتوى" />
+                </MudListItem>
+                <MudListItem Icon="@Icons.Material.Filled.Language">
+                    <MudListItemText Primary="دعم متعدد اللغات" 
+                                    Secondary="واجهة باللغة العربية والإنجليزية مع إمكانية التوسع" />
+                </MudListItem>
+            </MudList>
+        </MudItem>
+        
+        <MudItem xs="12" md="4">
+            <MudPaper Class="pa-4" Elevation="2">
+                <MudStack Spacing="3" AlignItems="AlignItems.Center">
+                    <MudIcon Icon="@Icons.Material.Filled.Analytics" 
+                            Size="Size.Large" 
+                            Color="Color.Primary" />
+                    <MudText Typo="Typo.h6" Class="text-center">إحصائيات المنصة</MudText>
+                    
+                    <MudGrid>
+                        <MudItem xs="6" Class="text-center">
+                            <MudText Typo="Typo.h4" Color="Color.Primary">500+</MudText>
+                            <MudText Typo="Typo.body2">كتاب</MudText>
+                        </MudItem>
+                        <MudItem xs="6" Class="text-center">
+                            <MudText Typo="Typo.h4" Color="Color.Secondary">1000+</MudText>
+                            <MudText Typo="Typo.body2">مستخدم</MudText>
+                        </MudItem>
+                        <MudItem xs="6" Class="text-center">
+                            <MudText Typo="Typo.h4" Color="Color.Success">50+</MudText>
+                            <MudText Typo="Typo.body2">مؤلف</MudText>
+                        </MudItem>
+                        <MudItem xs="6" Class="text-center">
+                            <MudText Typo="Typo.h4" Color="Color.Info">15+</MudText>
+                            <MudText Typo="Typo.body2">فئة</MudText>
+                        </MudItem>
+                    </MudGrid>
+                </MudStack>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+
+    <!-- Team Section -->
+    <MudText Typo="Typo.h4" Color="Color.Primary" Class="mb-4 text-center">
+        <MudIcon Icon="@Icons.Material.Filled.Group" Class="mr-2" />
+        فريق العمل / Our Team
+    </MudText>
+
+    <MudGrid Class="mb-8">
+        <MudItem xs="12" sm="6" md="4">
+            <MudCard Elevation="3">
+                <MudCardMedia Image="/images/team/scholar.jpg" Height="200" />
+                <MudCardContent>
+                    <MudText Typo="Typo.h6">فضيلة الشيخ أحمد</MudText>
+                    <MudText Typo="Typo.body2" Color="Color.Secondary">المشرف العلمي</MudText>
+                    <MudText Typo="Typo.body2" Class="mt-2">
+                        دكتوراه في الشريعة الإسلامية، متخصص في العقيدة والفقه
+                    </MudText>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+
+        <MudItem xs="12" sm="6" md="4">
+            <MudCard Elevation="3">
+                <MudCardMedia Image="/images/team/developer.jpg" Height="200" />
+                <MudCardContent>
+                    <MudText Typo="Typo.h6">م. محمد علي</MudText>
+                    <MudText Typo="Typo.body2" Color="Color.Secondary">مطور رئيسي</MudText>
+                    <MudText Typo="Typo.body2" Class="mt-2">
+                        خبير في تطوير التطبيقات الويب والتقنيات الحديثة
+                    </MudText>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+
+        <MudItem xs="12" sm="6" md="4">
+            <MudCard Elevation="3">
+                <MudCardMedia Image="/images/team/designer.jpg" Height="200" />
+                <MudCardContent>
+                    <MudText Typo="Typo.h6">أ. فاطمة الزهراء</MudText>
+                    <MudText Typo="Typo.body2" Color="Color.Secondary">مصممة واجهات</MudText>
+                    <MudText Typo="Typo.body2" Class="mt-2">
+                        متخصصة في تصميم تجربة المستخدم والواجهات التفاعلية
+                    </MudText>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+    </MudGrid>
+
+    <!-- Support and Contribute -->
+    <MudPaper Class="pa-6" Elevation="3" Style="background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);">
+        <MudText Typo="Typo.h5" Color="Color.Primary" Class="mb-4 text-center">
+            <MudIcon Icon="@Icons.Material.Filled.Favorite" Class="mr-2" />
+            ادعم المشروع / Support the Project
+        </MudText>
+        
+        <MudGrid AlignItems="AlignItems.Center">
+            <MudItem xs="12" md="8">
+                <MudText Typo="Typo.body1" Class="mb-3">
+                    الإصلاحي تحفة مشروع خيري يهدف لنشر العلم النافع. يمكنك المساهمة في استمرارية المشروع من خلال:
+                </MudText>
+                <MudList Dense="true">
+                    <MudListItem Icon="@Icons.Material.Filled.VolunteerActivism">
+                        <MudListItemText Primary="التطوع في مراجعة وتصحيح المحتوى" />
+                    </MudListItem>
+                    <MudListItem Icon="@Icons.Material.Filled.Share">
+                        <MudListItemText Primary="مشاركة المنصة مع الأصدقاء والعائلة" />
+                    </MudListItem>
+                    <MudListItem Icon="@Icons.Material.Filled.Feedback">
+                        <MudListItemText Primary="تقديم الاقتراحات والملاحظات" />
+                    </MudListItem>
+                    <MudListItem Icon="@Icons.Material.Filled.MonetizationOn">
+                        <MudListItemText Primary="الدعم المالي لتطوير المنصة" />
+                    </MudListItem>
+                </MudList>
+            </MudItem>
+            
+            <MudItem xs="12" md="4" Class="text-center">
+                <MudButton Color="Color.Primary" 
+                          Size="Size.Large" 
+                          StartIcon="@Icons.Material.Filled.ContactMail"
+                          Href="/contact"
+                          FullWidth="true">
+                    تواصل معنا / Contact Us
+                </MudButton>
+            </MudItem>
+        </MudGrid>
+    </MudPaper>
+</MudContainer>

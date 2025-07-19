@@ -1,0 +1,261 @@
+﻿@page "/contact"
+@using IsladebhiTohfa.Application.DTOs
+@inject ISnackbar Snackbar
+
+<PageTitle>تواصل معنا - Contact Islahi Tohfa</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="pa-4">
+    <!-- Header -->
+    <MudPaper Class="pa-8 mb-6 text-center" Elevation="3" Style="background: linear-gradient(135deg, #1B7332 0%, #22a83a 100%); color: white;">
+        <MudText Typo="Typo.h3" Class="mb-2">
+            <MudIcon Icon="@Icons.Material.Filled.ContactMail" Class="mr-2" />
+            تواصل معنا
+        </MudText>
+        <MudText Typo="Typo.h4" Class="mb-4">
+            Contact Us
+        </MudText>
+        <MudText Typo="Typo.h6" Style="max-width: 600px; margin: 0 auto;">
+            نحن هنا للاستماع إليك ومساعدتك. لا تتردد في التواصل معنا بأي استفسار أو اقتراح
+        </MudText>
+        <MudText Typo="Typo.subtitle1" Style="max-width: 600px; margin: 0 auto;">
+            We're here to listen and help. Don't hesitate to contact us with any questions or suggestions
+        </MudText>
+    </MudPaper>
+
+    <MudGrid>
+        <!-- Contact Form -->
+        <MudItem xs="12" md="8">
+            <MudPaper Class="pa-6" Elevation="2">
+                <MudText Typo="Typo.h5" Color="Color.Primary" Class="mb-4">
+                    <MudIcon Icon="@Icons.Material.Filled.Message" Class="mr-2" />
+                    أرسل لنا رسالة / Send us a Message
+                </MudText>
+
+                <EditForm Model="@contactForm" OnValidSubmit="SubmitContactForm">
+                    <DataAnnotationsValidator />
+                    
+                    <MudGrid>
+                        <MudItem xs="12" sm="6">
+                            <MudTextField @bind-Value="contactForm.Name"
+                                         For="@(() => contactForm.Name)"
+                                         Label="الاسم الكامل / Full Name"
+                                         Required="true"
+                                         Margin="Margin.Normal" />
+                        </MudItem>
+
+                        <MudItem xs="12" sm="6">
+                            <MudTextField @bind-Value="contactForm.Email"
+                                         For="@(() => contactForm.Email)"
+                                         Label="البريد الإلكتروني / Email"
+                                         Required="true"
+                                         Margin="Margin.Normal" />
+                        </MudItem>
+
+                        <MudItem xs="12">
+                            <MudSelect @bind-Value="contactForm.Subject"
+                                      Label="موضوع الرسالة / Subject"
+                                      Required="true"
+                                      Margin="Margin.Normal">
+                                <MudSelectItem Value="@("general")">استفسار عام / General Inquiry</MudSelectItem>
+                                <MudSelectItem Value="@("technical")">مشكلة تقنية / Technical Issue</MudSelectItem>
+                                <MudSelectItem Value="@("content")">اقتراح محتوى / Content Suggestion</MudSelectItem>
+                                <MudSelectItem Value="@("partnership")">شراكة / Partnership</MudSelectItem>
+                                <MudSelectItem Value="@("feedback")">ملاحظات / Feedback</MudSelectItem>
+                                <MudSelectItem Value="@("other")">أخرى / Other</MudSelectItem>
+                            </MudSelect>
+                        </MudItem>
+
+                        <MudItem xs="12">
+                            <MudTextField @bind-Value="contactForm.Message"
+                                         For="@(() => contactForm.Message)"
+                                         Label="الرسالة / Message"
+                                         Multiline="true"
+                                         Rows="6"
+                                         Required="true"
+                                         Margin="Margin.Normal" />
+                        </MudItem>
+
+                        <MudItem xs="12">
+                            <MudButton ButtonType="ButtonType.Submit"
+                                      Variant="Variant.Filled"
+                                      Color="Color.Primary"
+                                      Size="Size.Large"
+                                      StartIcon="@Icons.Material.Filled.Send"
+                                      Disabled="@isSubmitting">
+                                @if (isSubmitting)
+                                {
+                                    <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
+                                    <MudText Class="ms-2">جاري الإرسال...</MudText>
+                                }
+                                else
+                                {
+                                    <MudText>إرسال الرسالة / Send Message</MudText>
+                                }
+                            </MudButton>
+                        </MudItem>
+                    </MudGrid>
+                </EditForm>
+            </MudPaper>
+        </MudItem>
+
+        <!-- Contact Information -->
+        <MudItem xs="12" md="4">
+            <MudStack Spacing="4">
+                <!-- Contact Details -->
+                <MudPaper Class="pa-4" Elevation="2">
+                    <MudText Typo="Typo.h6" Color="Color.Primary" Class="mb-3">
+                        <MudIcon Icon="@Icons.Material.Filled.Info" Class="mr-2" />
+                        معلومات التواصل / Contact Info
+                    </MudText>
+                    
+                    <MudList>
+                        <MudListItem Icon="@Icons.Material.Filled.Email">
+                            <MudListItemText Primary="البريد الإلكتروني" 
+                                            Secondary="info@islahitohfa.com" />
+                        </MudListItem>
+                        <MudListItem Icon="@Icons.Material.Filled.Phone">
+                            <MudListItemText Primary="الهاتف" 
+                                            Secondary="+966 11 123 4567" />
+                        </MudListItem>
+                        <MudListItem Icon="@Icons.Material.Filled.LocationOn">
+                            <MudListItemText Primary="العنوان" 
+                                            Secondary="الرياض، المملكة العربية السعودية" />
+                        </MudListItem>
+                        <MudListItem Icon="@Icons.Material.Filled.Schedule">
+                            <MudListItemText Primary="ساعات العمل" 
+                                            Secondary="24/7 - خدمة مستمرة" />
+                        </MudListItem>
+                    </MudList>
+                </MudPaper>
+
+                <!-- Social Media -->
+                <MudPaper Class="pa-4" Elevation="2">
+                    <MudText Typo="Typo.h6" Color="Color.Primary" Class="mb-3">
+                        <MudIcon Icon="@Icons.Material.Filled.Share" Class="mr-2" />
+                        تابعنا / Follow Us
+                    </MudText>
+                    
+                    <MudStack Row="true" Spacing="2" Justify="Justify.SpaceAround">
+                        <MudIconButton Icon="@Icons.Custom.Brands.Facebook"
+                                      Color="Color.Primary"
+                                      Size="Size.Large"
+                                      Href="https://facebook.com/islahitohfa"
+                                      Target="_blank" />
+                        <MudIconButton Icon="@Icons.Custom.Brands.Twitter"
+                                      Color="Color.Info"
+                                      Size="Size.Large"
+                                      Href="https://twitter.com/islahitohfa"
+                                      Target="_blank" />
+                        <MudIconButton Icon="@Icons.Custom.Brands.YouTube"
+                                      Color="Color.Error"
+                                      Size="Size.Large"
+                                      Href="https://youtube.com/islahitohfa"
+                                      Target="_blank" />
+                        <MudIconButton Icon="@Icons.Custom.Brands.Telegram"
+                                      Color="Color.Success"
+                                      Size="Size.Large"
+                                      Href="https://t.me/islahitohfa"
+                                      Target="_blank" />
+                    </MudStack>
+                </MudPaper>
+
+                <!-- FAQ -->
+                <MudPaper Class="pa-4" Elevation="2">
+                    <MudText Typo="Typo.h6" Color="Color.Primary" Class="mb-3">
+                        <MudIcon Icon="@Icons.Material.Filled.Help" Class="mr-2" />
+                        أسئلة شائعة / FAQ
+                    </MudText>
+                    
+                    <MudExpansionPanels Elevation="0">
+                        <MudExpansionPanel Text="كيف أقوم بإنشاء حساب؟">
+                            <MudText Typo="Typo.body2">
+                                يمكنك إنشاء حساب مجاني من خلال الضغط على "إنشاء حساب" في أعلى الصفحة وملء البيانات المطلوبة.
+                            </MudText>
+                        </MudExpansionPanel>
+                        
+                        <MudExpansionPanel Text="هل الكتب مجانية؟">
+                            <MudText Typo="Typo.body2">
+                                نعم، جميع الكتب على المنصة متاحة للقراءة والتحميل مجاناً.
+                            </MudText>
+                        </MudExpansionPanel>
+                        
+                        <MudExpansionPanel Text="كيف أقترح كتاباً جديداً؟">
+                            <MudText Typo="Typo.body2">
+                                يمكنك اقتراح كتب جديدة عبر نموذج التواصل أو عبر البريد الإلكتروني المباشر.
+                            </MudText>
+                        </MudExpansionPanel>
+                    </MudExpansionPanels>
+                </MudPaper>
+            </MudStack>
+        </MudItem>
+    </MudGrid>
+
+    <!-- Location Map -->
+    <MudPaper Class="pa-6 mt-6" Elevation="2">
+        <MudText Typo="Typo.h6" Color="Color.Primary" Class="mb-4">
+            <MudIcon Icon="@Icons.Material.Filled.Map" Class="mr-2" />
+            موقعنا / Our Location
+        </MudText>
+        
+        <div style="height: 400px; width: 100%; background: #f5f5f5; display: flex; align-items: center; justify-content: center; border-radius: 8px;">
+            <!-- Replace with actual map component -->
+            <MudStack AlignItems="AlignItems.Center" Spacing="2">
+                <MudIcon Icon="@Icons.Material.Filled.LocationOn" Size="Size.Large" Color="Color.Primary" />
+                <MudText Typo="Typo.h6">الرياض، المملكة العربية السعودية</MudText>
+                <MudText Typo="Typo.body2" Color="Color.Secondary">Riyadh, Saudi Arabia</MudText>
+            </MudStack>
+        </div>
+    </MudPaper>
+</MudContainer>
+
+@code {
+    private ContactFormDto contactForm = new();
+    private bool isSubmitting = false;
+
+    private async Task SubmitContactForm()
+    {
+        try
+        {
+            isSubmitting = true;
+            StateHasChanged();
+
+            // Simulate form submission
+            await Task.Delay(2000);
+
+            // Here you would typically send the form data to your backend
+            // await ContactService.SubmitContactFormAsync(contactForm);
+
+            Snackbar.Add("تم إرسال رسالتك بنجاح! سنتواصل معك قريباً / Your message has been sent successfully! We'll get back to you soon.", Severity.Success);
+            
+            // Reset form
+            contactForm = new();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add("حدث خطأ في إرسال الرسالة / Error sending message", Severity.Error);
+        }
+        finally
+        {
+            isSubmitting = false;
+            StateHasChanged();
+        }
+    }
+
+    // Contact Form DTO
+    public class ContactFormDto
+    {
+        [Required]
+        public string Name { get; set; } = "";
+        
+        [Required]
+        [EmailAddress]
+        public string Email { get; set; } = "";
+        
+        [Required]
+        public string Subject { get; set; } = "";
+        
+        [Required]
+        [MinLength(10)]
+        public string Message { get; set; } = "";
+    }
+}
