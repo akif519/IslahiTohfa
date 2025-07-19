@@ -19,7 +19,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Shared\" />
     <Folder Include="Pages\Books\" />
     <Folder Include="Pages\Admin\" />
     <Folder Include="wwwroot\images\icons\" />

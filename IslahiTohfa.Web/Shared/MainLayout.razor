@@ -1,0 +1,752 @@
+﻿@using Microsoft.AspNetCore.Components.Authorization
+@using IsladebhiTohfa.Application.DTOs
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager Navigation
+@inject IDialogService DialogService
+@inject IAuthenticationService AuthService
+@inject ISnackbar Snackbar
+
+<!-- Main Layout -->
+@inherits LayoutView
+@namespace IsladebhiTohfa.Web.Shared
+
+<MudThemeProvider Theme="@currentTheme" />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<MudLayout>
+    <!-- App Bar -->
+    <MudAppBar Elevation="1" Style="background: linear-gradient(135deg, #1B7332 0%, #22a83a 100%);">
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" 
+                      Color="Color.Inherit" 
+                      Edge="Edge.Start" 
+                      OnClick="@ToggleDrawer" />
+        
+        <!-- Logo -->
+        <MudStack Row="true" AlignItems="AlignItems.Center" Class="mr-4">
+            <MudImage Src="/images/islahi-tohfa-logo.png" 
+                     Alt="Islahi Tohfa" 
+                     Style="height: 40px; cursor: pointer;"
+                     @onclick="NavigateHome" />
+            <MudHidden Breakpoint="Breakpoint.SmAndDown">
+                <MudText Typo="Typo.h6" Style="color: white; font-weight: bold;">
+                    الإصلاحي تحفة
+                </MudText>
+            </MudHidden>
+        </MudStack>
+
+        <MudSpacer />
+
+        <!-- Search Bar -->
+        <MudHidden Breakpoint="Breakpoint.SmAndDown">
+            <MudStack Row="true" AlignItems="AlignItems.Center" Class="mr-4" Style="width: 400px;">
+                <MudTextField @bind-Value="searchQuery"
+                             Placeholder="ابحث عن الكتب... / Search books..."
+                             Adornment="Adornment.End"
+                             AdornmentIcon="@Icons.Material.Filled.Search"
+                             OnAdornmentClick="PerformSearch"
+                             OnKeyPress="OnSearchKeyPress"
+                             Immediate="true"
+                             Style="background: rgba(255,255,255,0.1); border-radius: 25px;"
+                             Variant="Variant.Filled"
+                             Margin="Margin.Dense" />
+            </MudStack>
+        </MudHidden>
+
+        <!-- User Menu -->
+        <AuthorizeView>
+            <Authorized>
+                <MudMenu Icon="@Icons.Material.Filled.AccountCircle" 
+                        Color="Color.Inherit" 
+                        Direction="Origin.BottomLeft"
+                        OffsetY="true">
+                    <ChildContent>
+                        <MudIconButton Icon="@Icons.Material.Filled.AccountCircle" 
+                                      Color="Color.Inherit" />
+                    </ChildContent>
+                    <MenuItems>
+                        <MudMenuItem Icon="@Icons.Material.Filled.Person" 
+                                    OnClick="NavigateToProfile">
+                            الملف الشخصي / Profile
+                        </MudMenuItem>
+                        <MudMenuItem Icon="@Icons.Material.Filled.Bookmark" 
+                                    OnClick="NavigateToBookmarks">
+                            العلامات المرجعية / Bookmarks
+                        </MudMenuItem>
+                        <MudMenuItem Icon="@Icons.Material.Filled.History" 
+                                    OnClick="NavigateToHistory">
+                            سجل القراءة / Reading History
+                        </MudMenuItem>
+                        
+                        <AuthorizeView Roles="Admin,Moderator">
+                            <MudDivider />
+                            <MudMenuItem Icon="@Icons.Material.Filled.Dashboard" 
+                                        OnClick="NavigateToAdmin">
+                                لوحة التحكم / Admin Panel
+                            </MudMenuItem>
+                        </AuthorizeView>
+                        
+                        <MudDivider />
+                        <MudMenuItem Icon="@Icons.Material.Filled.Settings" 
+                                    OnClick="NavigateToSettings">
+                            الإعدادات / Settings
+                        </MudMenuItem>
+                        <MudMenuItem Icon="@Icons.Material.Filled.Logout" 
+                                    OnClick="Logout">
+                            تسجيل الخروج / Logout
+                        </MudMenuItem>
+                    </MenuItems>
+                </MudMenu>
+            </Authorized>
+            <NotAuthorized>
+                <MudStack Row="true" Spacing="2">
+                    <MudButton Color="Color.Inherit" 
+                              StartIcon="@Icons.Material.Filled.Login"
+                              OnClick="NavigateToLogin">
+                        تسجيل الدخول
+                    </MudButton>
+                    <MudButton Color="Color.Secondary" 
+                              Variant="Variant.Filled"
+                              StartIcon="@Icons.Material.Filled.PersonAdd"
+                              OnClick="NavigateToRegister">
+                        إنشاء حساب
+                    </MudButton>
+                </MudStack>
+            </NotAuthorized>
+        </AuthorizeView>
+
+        <!-- Theme Toggle -->
+        <MudIconButton Icon="@(isDarkMode ? Icons.Material.Filled.LightMode : Icons.Material.Filled.DarkMode)"
+                      Color="Color.Inherit"
+                      OnClick="ToggleTheme"
+                      Class="ml-2" />
+
+        <!-- Language Toggle -->
+        <MudIconButton Icon="@Icons.Material.Filled.Language"
+                      Color="Color.Inherit"
+                      OnClick="ToggleLanguage"
+                      Class="ml-2" />
+    </MudAppBar>
+
+    <!-- Navigation Drawer -->
+    <MudDrawer @bind-Open="@isDrawerOpen" 
+              ClipMode="DrawerClipMode.Always" 
+              Elevation="2"
+              Style="width: 280px;">
+        <MudDrawerHeader>
+            <MudStack AlignItems="AlignItems.Center" Class="pa-4">
+                <MudImage Src="/images/islahi-tohfa-logo.png" 
+                         Alt="Islahi Tohfa" 
+                         Style="height: 60px;" />
+                <MudText Typo="Typo.h6" Color="Color.Primary">
+                    الإصلاحي تحفة
+                </MudText>
+                <MudText Typo="Typo.caption" Color="Color.Secondary">
+                    Islamic Educational Books
+                </MudText>
+            </MudStack>
+        </MudDrawerHeader>
+        
+        <MudNavMenu>
+            <!-- Main Navigation -->
+            <MudNavLink Href="/" 
+                       Icon="@Icons.Material.Filled.Home" 
+                       Match="NavLinkMatch.All">
+                الرئيسية / Home
+            </MudNavLink>
+            
+            <MudNavLink Href="/books" 
+                       Icon="@Icons.Material.Filled.MenuBook">
+                الكتب / Books
+            </MudNavLink>
+            
+            <MudNavGroup Title="الفئات / Categories" 
+                        Icon="@Icons.Material.Filled.Category"
+                        Expanded="true">
+                @foreach (var category in categories)
+                {
+                    <MudNavLink Href="@($"/books/category/{category.Id}")" 
+                               Icon="@category.IconClass">
+                        @category.NameArabic
+                    </MudNavLink>
+                }
+            </MudNavGroup>
+
+            <MudNavLink Href="/about" 
+                       Icon="@Icons.Material.Filled.Info">
+                حول الموقع / About
+            </MudNavLink>
+            
+            <MudNavLink Href="/contact" 
+                       Icon="@Icons.Material.Filled.ContactMail">
+                تواصل معنا / Contact
+            </MudNavLink>
+
+            <!-- User-specific links -->
+            <AuthorizeView>
+                <Authorized>
+                    <MudDivider Class="my-2" />
+                    <MudNavLink Href="/profile" 
+                               Icon="@Icons.Material.Filled.Person">
+                        الملف الشخصي / Profile
+                    </MudNavLink>
+                    
+                    <MudNavLink Href="/bookmarks" 
+                               Icon="@Icons.Material.Filled.Bookmark">
+                        علاماتي المرجعية / My Bookmarks
+                    </MudNavLink>
+                    
+                    <MudNavLink Href="/reading-history" 
+                               Icon="@Icons.Material.Filled.History">
+                        سجل القراءة / Reading History
+                    </MudNavLink>
+                </Authorized>
+            </AuthorizeView>
+
+            <!-- Admin links -->
+            <AuthorizeView Roles="Admin,Moderator">
+                <MudDivider Class="my-2" />
+                <MudNavGroup Title="الإدارة / Administration" 
+                            Icon="@Icons.Material.Filled.AdminPanelSettings"
+                            Expanded="false">
+                    <MudNavLink Href="/admin/dashboard" 
+                               Icon="@Icons.Material.Filled.Dashboard">
+                        لوحة التحكم / Dashboard
+                    </MudNavLink>
+                    
+                    <MudNavLink Href="/admin/books" 
+                               Icon="@Icons.Material.Filled.LibraryBooks">
+                        إدارة الكتب / Manage Books
+                    </MudNavLink>
+                    
+                    <MudNavLink Href="/admin/users" 
+                               Icon="@Icons.Material.Filled.People">
+                        إدارة المستخدمين / Manage Users
+                    </MudNavLink>
+                    
+                    <MudNavLink Href="/admin/analytics" 
+                               Icon="@Icons.Material.Filled.Analytics">
+                        التقارير / Analytics
+                    </MudNavLink>
+                </MudNavGroup>
+            </AuthorizeView>
+        </MudNavMenu>
+
+        <!-- Footer in Drawer -->
+        <MudSpacer />
+        <div class="pa-4 text-center">
+            <MudText Typo="Typo.caption" Color="Color.Secondary">
+                © 2024 Islahi Tohfa
+            </MudText>
+            <MudText Typo="Typo.caption" Color="Color.Secondary">
+                نشر المعرفة الإسلامية
+            </MudText>
+        </div>
+    </MudDrawer>
+
+    <!-- Main Content -->
+    <MudMainContent>
+        <MudContainer MaxWidth="MaxWidth.False" Class="pa-0">
+            @Body
+        </MudContainer>
+    </MudMainContent>
+
+    <!-- Footer -->
+    <MudPaper Elevation="0" Class="footer" Style="background: #1B7332; color: white; margin-top: auto;">
+        <MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="pa-6">
+            <MudGrid>
+                <MudItem xs="12" md="4">
+                    <MudStack Spacing="3">
+                        <MudImage Src="/images/islahi-tohfa-logo.png" 
+                                 Alt="Islahi Tohfa" 
+                                 Style="height: 60px; filter: brightness(0) invert(1);" />
+                        <MudText Typo="Typo.h6">الإصلاحي تحفة</MudText>
+                        <MudText Typo="Typo.body2">
+                            منصة تعليمية إسلامية تهدف إلى نشر الكتب الإسلامية والمعرفة النافعة لخدمة الأمة الإسلامية.
+                        </MudText>
+                        <MudText Typo="Typo.body2">
+                            An Islamic educational platform dedicated to spreading beneficial knowledge and Islamic books.
+                        </MudText>
+                    </MudStack>
+                </MudItem>
+                
+                <MudItem xs="12" md="2">
+                    <MudText Typo="Typo.h6" Class="mb-3">روابط سريعة</MudText>
+                    <MudStack Spacing="1">
+                        <MudLink Href="/" Color="Color.Inherit">الرئيسية</MudLink>
+                        <MudLink Href="/books" Color="Color.Inherit">الكتب</MudLink>
+                        <MudLink Href="/about" Color="Color.Inherit">حول الموقع</MudLink>
+                        <MudLink Href="/contact" Color="Color.Inherit">تواصل معنا</MudLink>
+                    </MudStack>
+                </MudItem>
+                
+                <MudItem xs="12" md="2">
+                    <MudText Typo="Typo.h6" Class="mb-3">الفئات الرئيسية</MudText>
+                    <MudStack Spacing="1">
+                        <MudLink Href="/books/category/1" Color="Color.Inherit">العقيدة</MudLink>
+                        <MudLink Href="/books/category/2" Color="Color.Inherit">القرآن والتفسير</MudLink>
+                        <MudLink Href="/books/category/3" Color="Color.Inherit">الحديث</MudLink>
+                        <MudLink Href="/books/category/4" Color="Color.Inherit">الفقه</MudLink>
+                    </MudStack>
+                </MudItem>
+                
+                <MudItem xs="12" md="2">
+                    <MudText Typo="Typo.h6" Class="mb-3">الحساب</MudText>
+                    <MudStack Spacing="1">
+                        <AuthorizeView>
+                            <Authorized>
+                                <MudLink Href="/profile" Color="Color.Inherit">الملف الشخصي</MudLink>
+                                <MudLink Href="/bookmarks" Color="Color.Inherit">العلامات المرجعية</MudLink>
+                            </Authorized>
+                            <NotAuthorized>
+                                <MudLink Href="/account/login" Color="Color.Inherit">تسجيل الدخول</MudLink>
+                                <MudLink Href="/account/register" Color="Color.Inherit">إنشاء حساب</MudLink>
+                            </NotAuthorized>
+                        </AuthorizeView>
+                        <MudLink Href="/privacy" Color="Color.Inherit">سياسة الخصوصية</MudLink>
+                        <MudLink Href="/terms" Color="Color.Inherit">شروط الاستخدام</MudLink>
+                    </MudStack>
+                </MudItem>
+                
+                <MudItem xs="12" md="2">
+                    <MudText Typo="Typo.h6" Class="mb-3">تابعنا</MudText>
+                    <MudStack Row="true" Spacing="2">
+                        <MudIconButton Icon="@Icons.Custom.Brands.Facebook" 
+                                      Color="Color.Inherit" 
+                                      Size="Size.Large"
+                                      Href="https://facebook.com/islahitohfa" 
+                                      Target="_blank" />
+                        <MudIconButton Icon="@Icons.Custom.Brands.Twitter" 
+                                      Color="Color.Inherit" 
+                                      Size="Size.Large"
+                                      Href="https://twitter.com/islahitohfa" 
+                                      Target="_blank" />
+                        <MudIconButton Icon="@Icons.Custom.Brands.YouTube" 
+                                      Color="Color.Inherit" 
+                                      Size="Size.Large"
+                                      Href="https://youtube.com/islahitohfa" 
+                                      Target="_blank" />
+                        <MudIconButton Icon="@Icons.Custom.Brands.Telegram" 
+                                      Color="Color.Inherit" 
+                                      Size="Size.Large"
+                                      Href="https://t.me/islahitohfa" 
+                                      Target="_blank" />
+                    </MudStack>
+                </MudItem>
+            </MudGrid>
+            
+            <MudDivider Class="my-4" />
+            
+            <MudGrid AlignItems="AlignItems.Center">
+                <MudItem xs="12" md="6">
+                    <MudText Typo="Typo.body2">
+                        © 2024 الإصلاحي تحفة. جميع الحقوق محفوظة.
+                    </MudText>
+                </MudItem>
+                <MudItem xs="12" md="6" Class="text-right">
+                    <MudText Typo="Typo.body2">
+                        Built with ❤️ for the Islamic Ummah
+                    </MudText>
+                </MudItem>
+            </MudGrid>
+        </MudContainer>
+    </MudPaper>
+</MudLayout>
+
+@code {
+    private bool isDrawerOpen = false;
+    private bool isDarkMode = false;
+    private string searchQuery = "";
+    private string currentLanguage = "ar";
+    private List<CategoryDto> categories = new();
+    private MudTheme currentTheme = new MudTheme();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCategories();
+        await LoadUserPreferences();
+        SetupTheme();
+    }
+
+    private async Task LoadCategories()
+    {
+        try
+        {
+            // Load categories from service
+            // categories = await CategoryService.GetCategoriesAsync();
+            
+            // Placeholder data
+            categories = new List<CategoryDto>
+            {
+                new() { Id = 1, NameArabic = "العقيدة الإسلامية", IconClass = "fas fa-mosque" },
+                new() { Id = 2, NameArabic = "القرآن والتفسير", IconClass = "fas fa-book-open" },
+                new() { Id = 3, NameArabic = "الحديث الشريف", IconClass = "fas fa-scroll" },
+                new() { Id = 4, NameArabic = "الفقه الإسلامي", IconClass = "fas fa-balance-scale" },
+                new() { Id = 5, NameArabic = "التاريخ الإسلامي", IconClass = "fas fa-landmark" },
+                new() { Id = 6, NameArabic = "الأخلاق الإسلامية", IconClass = "fas fa-heart" }
+            };
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add("خطأ في تحميل الفئات / Error loading categories", Severity.Error);
+        }
+    }
+
+    private async Task LoadUserPreferences()
+    {
+        // Load user preferences from local storage or user profile
+        isDarkMode = await LocalStorage.GetItemAsync<bool>("darkMode");
+        currentLanguage = await LocalStorage.GetItemAsync<string>("language") ?? "ar";
+    }
+
+    private void SetupTheme()
+    {
+        currentTheme = new MudTheme()
+        {
+            Palette = new PaletteLight()
+            {
+                Primary = "#1B7332",
+                Secondary = "#DAA520",
+                Success = "#22a83a",
+                Info = "#1e3a8a",
+                Warning = "#f59e0b",
+                Error = "#dc2626",
+                AppbarBackground = "#1B7332",
+                DrawerBackground = "#fafafa"
+            },
+            PaletteDark = new PaletteDark()
+            {
+                Primary = "#22a83a",
+                Secondary = "#fbbf24",
+                Success = "#22a83a",
+                Info = "#3b82f6",
+                Warning = "#f59e0b",
+                Error = "#ef4444",
+                AppbarBackground = "#1a1a1a",
+                DrawerBackground = "#2d2d2d",
+                Surface = "#2d2d2d",
+                Background = "#1a1a1a"
+            },
+            Typography = new Typography()
+            {
+                Default = new Default()
+                {
+                    FontFamily = new[] { "Inter", "Roboto", "Arial", "sans-serif" }
+                }
+            }
+        };
+    }
+
+    private void ToggleDrawer()
+    {
+        isDrawerOpen = !isDrawerOpen;
+    }
+
+    private async Task ToggleTheme()
+    {
+        isDarkMode = !isDarkMode;
+        await LocalStorage.SetItemAsync("darkMode", isDarkMode);
+        StateHasChanged();
+    }
+
+    private async Task ToggleLanguage()
+    {
+        currentLanguage = currentLanguage == "ar" ? "en" : "ar";
+        await LocalStorage.SetItemAsync("language", currentLanguage);
+        
+        // Implement language switching logic
+        Snackbar.Add("Language switched / تم تغيير اللغة", Severity.Success);
+        StateHasChanged();
+    }
+
+    private async Task PerformSearch()
+    {
+        if (!string.IsNullOrWhiteSpace(searchQuery))
+        {
+            Navigation.NavigateTo($"/books/search?q={Uri.EscapeDataString(searchQuery)}");
+        }
+    }
+
+    private async Task OnSearchKeyPress(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await PerformSearch();
+        }
+    }
+
+    // Navigation methods
+    private void NavigateHome() => Navigation.NavigateTo("/");
+    private void NavigateToLogin() => Navigation.NavigateTo("/account/login");
+    private void NavigateToRegister() => Navigation.NavigateTo("/account/register");
+    private void NavigateToProfile() => Navigation.NavigateTo("/profile");
+    private void NavigateToBookmarks() => Navigation.NavigateTo("/bookmarks");
+    private void NavigateToHistory() => Navigation.NavigateTo("/reading-history");
+    private void NavigateToSettings() => Navigation.NavigateTo("/settings");
+    private void NavigateToAdmin() => Navigation.NavigateTo("/admin/dashboard");
+
+    private async Task Logout()
+    {
+        try
+        {
+            await AuthService.LogoutAsync();
+            Snackbar.Add("تم تسجيل الخروج بنجاح / Logged out successfully", Severity.Success);
+            Navigation.NavigateTo("/");
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add("خطأ في تسجيل الخروج / Error logging out", Severity.Error);
+        }
+    }
+}
+
+<style>
+    .footer {
+        margin-top: auto;
+    }
+    
+    .mud-nav-link {
+        border-radius: 8px;
+        margin: 2px 8px;
+    }
+    
+    .mud-nav-link:hover {
+        background-color: rgba(27, 115, 50, 0.1);
+    }
+    
+    .mud-nav-link.active {
+        background-color: rgba(27, 115, 50, 0.2);
+        color: #1B7332;
+        font-weight: 600;
+    }
+    
+    /* RTL Support */
+    .rtl {
+        direction: rtl;
+        text-align: right;
+    }
+    
+    /* Custom scrollbar */
+    .mud-drawer-content::-webkit-scrollbar {
+        width: 6px;
+    }
+    
+    .mud-drawer-content::-webkit-scrollbar-track {
+        background: #f1f1f1;
+    }
+    
+    .mud-drawer-content::-webkit-scrollbar-thumb {
+        background: #c1c1c1;
+        border-radius: 3px;
+    }
+    
+    .mud-drawer-content::-webkit-scrollbar-thumb:hover {
+        background: #a8a8a8;
+    }
+</style>
+
+    <!-- Admin Layout -->
+@page "/admin/{*path}"
+@layout AdminLayout
+@namespace IsladebhiTohfa.Web.Shared
+@attribute [Authorize(Roles = "Admin,Moderator")]
+
+<MudThemeProvider Theme="@adminTheme" />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<MudLayout>
+    <!-- Admin App Bar -->
+    <MudAppBar Elevation="1" Style="background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);">
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" 
+                      Color="Color.Inherit" 
+                      Edge="Edge.Start" 
+                      OnClick="@ToggleAdminDrawer" />
+        
+        <MudText Typo="Typo.h6" Style="color: white;">
+            <MudIcon Icon="@Icons.Material.Filled.AdminPanelSettings" Class="mr-2" />
+            لوحة التحكم الإدارية / Admin Panel
+        </MudText>
+
+        <MudSpacer />
+        
+        <!-- Quick Actions -->
+        <MudButton Color="Color.Inherit" 
+                  StartIcon="@Icons.Material.Filled.Add"
+                  OnClick="QuickAddBook">
+            إضافة كتاب سريع
+        </MudButton>
+        
+        <MudButton Color="Color.Inherit" 
+                  StartIcon="@Icons.Material.Filled.Home"
+                  Href="/"
+                  Class="ml-2">
+            العودة للموقع
+        </MudButton>
+
+        <!-- Admin User Menu -->
+        <MudMenu Icon="@Icons.Material.Filled.AccountCircle" 
+                Color="Color.Inherit" 
+                Direction="Origin.BottomLeft"
+                OffsetY="true"
+                Class="ml-2">
+            <ChildContent>
+                <MudIconButton Icon="@Icons.Material.Filled.AccountCircle" 
+                              Color="Color.Inherit" />
+            </ChildContent>
+            <MenuItems>
+                <MudMenuItem Icon="@Icons.Material.Filled.Person">
+                    الملف الشخصي / Profile
+                </MudMenuItem>
+                <MudMenuItem Icon="@Icons.Material.Filled.Settings">
+                    إعدادات النظام / System Settings
+                </MudMenuItem>
+                <MudDivider />
+                <MudMenuItem Icon="@Icons.Material.Filled.Logout" 
+                            OnClick="LogoutAdmin">
+                    تسجيل الخروج / Logout
+                </MudMenuItem>
+            </MenuItems>
+        </MudMenu>
+    </MudAppBar>
+
+    <!-- Admin Navigation Drawer -->
+    <MudDrawer @bind-Open="@isAdminDrawerOpen" 
+              ClipMode="DrawerClipMode.Always" 
+              Elevation="2"
+              Style="width: 280px;">
+        <MudDrawerHeader>
+            <MudStack AlignItems="AlignItems.Center" Class="pa-4">
+                <MudIcon Icon="@Icons.Material.Filled.AdminPanelSettings" 
+                        Size="Size.Large" 
+                        Color="Color.Primary" />
+                <MudText Typo="Typo.h6" Color="Color.Primary">
+                    إدارة النظام
+                </MudText>
+                <MudText Typo="Typo.caption" Color="Color.Secondary">
+                    System Administration
+                </MudText>
+            </MudStack>
+        </MudDrawerHeader>
+        
+        <MudNavMenu>
+            <MudNavLink Href="/admin/dashboard" 
+                       Icon="@Icons.Material.Filled.Dashboard" 
+                       Match="NavLinkMatch.All">
+                لوحة التحكم / Dashboard
+            </MudNavLink>
+            
+            <MudNavGroup Title="إدارة المحتوى / Content Management" 
+                        Icon="@Icons.Material.Filled.LibraryBooks"
+                        Expanded="true">
+                <MudNavLink Href="/admin/books" 
+                           Icon="@Icons.Material.Filled.MenuBook">
+                    الكتب / Books
+                </MudNavLink>
+                <MudNavLink Href="/admin/categories" 
+                           Icon="@Icons.Material.Filled.Category">
+                    الفئات / Categories
+                </MudNavLink>
+                <MudNavLink Href="/admin/comments" 
+                           Icon="@Icons.Material.Filled.Comment">
+                    التعليقات / Comments
+                </MudNavLink>
+            </MudNavGroup>
+
+            <MudNavGroup Title="إدارة المستخدمين / User Management" 
+                        Icon="@Icons.Material.Filled.People">
+                <MudNavLink Href="/admin/users" 
+                           Icon="@Icons.Material.Filled.Person">
+                    المستخدمون / Users
+                </MudNavLink>
+                <MudNavLink Href="/admin/roles" 
+                           Icon="@Icons.Material.Filled.Security">
+                    الأدوار / Roles
+                </MudNavLink>
+            </MudNavGroup>
+
+            <MudNavGroup Title="التقارير والإحصائيات / Reports & Analytics" 
+                        Icon="@Icons.Material.Filled.Analytics">
+                <MudNavLink Href="/admin/analytics" 
+                           Icon="@Icons.Material.Filled.BarChart">
+                    التحليلات / Analytics
+                </MudNavLink>
+                <MudNavLink Href="/admin/reports" 
+                           Icon="@Icons.Material.Filled.Assessment">
+                    التقارير / Reports
+                </MudNavLink>
+                <MudNavLink Href="/admin/logs" 
+                           Icon="@Icons.Material.Filled.History">
+                    سجلات النظام / System Logs
+                </MudNavLink>
+            </MudNavGroup>
+
+            <MudNavGroup Title="الإعدادات / Settings" 
+                        Icon="@Icons.Material.Filled.Settings">
+                <MudNavLink Href="/admin/site-settings" 
+                           Icon="@Icons.Material.Filled.Web">
+                    إعدادات الموقع / Site Settings
+                </MudNavLink>
+                <MudNavLink Href="/admin/email-settings" 
+                           Icon="@Icons.Material.Filled.Email">
+                    إعدادات البريد / Email Settings
+                </MudNavLink>
+                <MudNavLink Href="/admin/backup" 
+                           Icon="@Icons.Material.Filled.Backup">
+                    النسخ الاحتياطي / Backup
+                </MudNavLink>
+            </MudNavGroup>
+        </MudNavMenu>
+    </MudDrawer>
+
+    <!-- Admin Main Content -->
+    <MudMainContent>
+        <MudContainer MaxWidth="MaxWidth.False" Class="pa-4">
+            @Body
+        </MudContainer>
+    </MudMainContent>
+</MudLayout>
+
+@code {
+    private bool isAdminDrawerOpen = true;
+    private MudTheme adminTheme = new MudTheme();
+
+    protected override void OnInitialized()
+    {
+        SetupAdminTheme();
+    }
+
+    private void SetupAdminTheme()
+    {
+        adminTheme = new MudTheme()
+        {
+            Palette = new PaletteLight()
+            {
+                Primary = "#1e3a8a",
+                Secondary = "#3b82f6",
+                Success = "#22a83a",
+                Info = "#06b6d4",
+                Warning = "#f59e0b",
+                Error = "#dc2626",
+                AppbarBackground = "#1e3a8a",
+                DrawerBackground = "#f8fafc"
+            }
+        };
+    }
+
+    private void ToggleAdminDrawer()
+    {
+        isAdminDrawerOpen = !isAdminDrawerOpen;
+    }
+
+    private async Task QuickAddBook()
+    {
+        Navigation.NavigateTo("/admin/books/add");
+    }
+
+    private async Task LogoutAdmin()
+    {
+        await AuthService.LogoutAsync();
+        Navigation.NavigateTo("/");
+    }
+}
