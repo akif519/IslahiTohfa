@@ -1,0 +1,120 @@
+@{
+    ViewData["Title"] = "رابطہ";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Page Header -->
+            <div class="text-center mb-5">
+                <h1 class="display-4 fw-bold">
+                    <i class="fas fa-envelope text-primary ms-3"></i>
+                    ہم سے رابطہ کریں
+                </h1>
+                <p class="lead text-muted">ہم آپ کی مدد کے لیے موجود ہیں</p>
+            </div>
+
+            <!-- Contact Info Cards -->
+            <div class="row g-4 mb-5">
+                <div class="col-md-4">
+                    <div class="card card-custom text-center h-100">
+                        <div class="card-body p-4">
+                            <div class="text-primary mb-3">
+                                <i class="fas fa-envelope fa-2x"></i>
+                            </div>
+                            <h5>ای میل</h5>
+                            <a href="mailto:info@islahitohfa.com" class="text-decoration-none">
+                                info@islahitohfa.com
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="card card-custom text-center h-100">
+                        <div class="card-body p-4">
+                            <div class="text-success mb-3">
+                                <i class="fas fa-phone fa-2x"></i>
+                            </div>
+                            <h5>فون</h5>
+                            <a href="tel:+920000000000" class="text-decoration-none">
+                                +92 000 0000000
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="card card-custom text-center h-100">
+                        <div class="card-body p-4">
+                            <div class="text-info mb-3">
+                                <i class="fas fa-map-marker-alt fa-2x"></i>
+                            </div>
+                            <h5>پتہ</h5>
+                            <p class="mb-0">
+                                پاکستان
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Form -->
+            <div class="card card-custom">
+                <div class="card-body p-5">
+                    <h3 class="h4 mb-4 text-center">پیغام بھیجیں</h3>
+                    
+                    <form method="post" asp-controller="Home" asp-action="SubmitContact">
+                        @Html.AntiForgeryToken()
+                        
+                        <div class="mb-4">
+                            <label for="name" class="form-label">نام</label>
+                            <input type="text" class="form-control form-control-lg" id="name" name="Name" required>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="email" class="form-label">ای میل</label>
+                            <input type="email" class="form-control form-control-lg" id="email" name="Email" required>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="subject" class="form-label">موضوع</label>
+                            <input type="text" class="form-control form-control-lg" id="subject" name="Subject" required>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="message" class="form-label">پیغام</label>
+                            <textarea class="form-control form-control-lg" id="message" name="Message" rows="6" required></textarea>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-paper-plane ms-2"></i>
+                                پیغام بھیجیں
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Social Media -->
+            <div class="text-center mt-5">
+                <h4 class="mb-3">سوشل میڈیا پر ہمارے ساتھ جڑیں</h4>
+                <div>
+                    <a href="#" class="btn btn-primary btn-lg m-2">
+                        <i class="fab fa-facebook fa-lg"></i>
+                    </a>
+                    <a href="#" class="btn btn-info btn-lg m-2">
+                        <i class="fab fa-twitter fa-lg"></i>
+                    </a>
+                    <a href="#" class="btn btn-danger btn-lg m-2">
+                        <i class="fab fa-youtube fa-lg"></i>
+                    </a>
+                    <a href="#" class="btn btn-success btn-lg m-2">
+                        <i class="fab fa-whatsapp fa-lg"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
