@@ -1,4 +1,4 @@
-@using IslahiTohfa.WebUI.Helpers
+﻿@using IslahiTohfa.WebUI.Helpers
 @{
     ViewData["Title"] = LocalizationHelper.GetText("Home", Context);
     var featuredBooks = ViewBag.FeaturedBooks as IEnumerable<BookDto> ?? Enumerable.Empty<BookDto>();
@@ -7,75 +7,144 @@
     var dir = LocalizationHelper.GetDirection(Context);
 }
 
-<!-- Hero Section -->
-<section class="hero-section py-5" style="background: linear-gradient(135deg, #2c7a7b 0%, #38b2ac 100%);">
-    <div class="container text-center text-white">
-        <div class="row justify-content-center">
-            <div class="col-lg-8">
-                <h1 class="display-4 fw-bold mb-4">
-                    <i class="fas fa-book-open @(dir == "rtl" ? "ms-3" : "me-3")"></i>
-                    @LocalizationHelper.GetText("AppName", Context)
-                </h1>
-                <p class="lead mb-4">
-                    @LocalizationHelper.GetText("Tagline", Context)
-                </p>
-                <form asp-controller="Book" asp-action="Index" method="get" class="mt-4">
-                    <div class="input-group input-group-lg">
-                        <input type="text" name="SearchTerm" class="form-control" placeholder="@LocalizationHelper.GetText("SearchPlaceholder", Context)">
-                        <button class="btn btn-light" type="submit">
-                            <i class="fas fa-search"></i>
-                            @LocalizationHelper.GetText("Search", Context)
-                        </button>
+<!-- Modern Hero Section -->
+<section class="hero-modern">
+    <div class="container">
+        <div class="hero-content text-center text-white">
+            <div class="row justify-content-center">
+                <div class="col-lg-10">
+                    <div class="hero-icon-float mb-4">
+                        <i class="fas fa-book-open" style="font-size: 4rem; opacity: 0.9;"></i>
                     </div>
-                </form>
+                    
+                    <h1 class="mb-4">
+                        @LocalizationHelper.GetText("AppName", Context)
+                    </h1>
+                    
+                    <p class="lead mb-5">
+                        @LocalizationHelper.GetText("Tagline", Context)
+                    </p>
+                    
+                    <!-- Modern Search Box -->
+                    <div class="hero-search-box">
+                        <form asp-controller="Book" asp-action="Index" method="get">
+                            <div class="input-group input-group-lg shadow-lg">
+                                <input type="text" 
+                                       name="SearchTerm" 
+                                       class="form-control border-0" 
+                                       placeholder="@LocalizationHelper.GetText("SearchPlaceholder", Context)"
+                                       style="background: white;">
+                                <button class="btn btn-light px-5" type="submit" style="background: white; color: var(--primary-color);">
+                                    <i class="fas fa-search @(dir == "rtl" ? "ms-2" : "me-2")"></i>
+                                    @LocalizationHelper.GetText("Search", Context)
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <!-- Quick Stats Under Search -->
+                    <div class="row mt-5 g-4">
+                        <div class="col-6 col-md-3">
+                            <div class="text-white">
+                                <h3 class="mb-0 fw-bold">@recentBooks.Count()+</h3>
+                                <small class="opacity-75">@LocalizationHelper.GetText("TotalBooks", Context)</small>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="text-white">
+                                <h3 class="mb-0 fw-bold">1000+</h3>
+                                <small class="opacity-75">@LocalizationHelper.GetText("TotalUsers", Context)</small>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="text-white">
+                                <h3 class="mb-0 fw-bold">5000+</h3>
+                                <small class="opacity-75">@LocalizationHelper.GetText("TotalDownloads", Context)</small>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="text-white">
+                                <h3 class="mb-0 fw-bold">4.8⭐</h3>
+                                <small class="opacity-75">Average Rating</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
+    </div>
+    
+    <!-- Wave Shape Divider -->
+    <div style="position: absolute; bottom: 0; left: 0; width: 100%; overflow: hidden; line-height: 0;">
+        <svg viewBox="0 0 1200 120" preserveAspectRatio="none" style="width: 100%; height: 60px;">
+            <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" style="fill: #f8fafc;"></path>
+        </svg>
     </div>
 </section>
 
 <!-- Featured Books Section -->
 @if (featuredBooks.Any())
 {
-    <section class="py-5">
+    <section class="py-5 bg-pattern">
         <div class="container">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2 class="h3 mb-0">
-                    <i class="fas fa-star text-warning @(dir == "rtl" ? "ms-2" : "me-2")"></i>
+            <div class="section-header text-center mb-5">
+                <h2 class="section-title">
+                    <i class="fas fa-star text-warning @(dir == "rtl" ? "ms-3" : "me-3")"></i>
                     @LocalizationHelper.GetText("FeaturedBooks", Context)
                 </h2>
-                <a asp-controller="Book" asp-action="Index" class="btn btn-outline-primary">
-                    @LocalizationHelper.GetText("ViewAll", Context)
-                    <i class="fas fa-arrow-@(dir == "rtl" ? "left" : "right") @(dir == "rtl" ? "me-2" : "ms-2")"></i>
-                </a>
+                <p class="section-subtitle">@LocalizationHelper.GetText("Tagline", Context)</p>
             </div>
             
-            <div class="row g-4">
+            <div class="row g-4 mb-4">
                 @foreach (var book in featuredBooks)
                 {
                     <div class="col-lg-4 col-md-6">
-                        <div class="card card-custom h-100">
-                            @if (!string.IsNullOrEmpty(book.CoverImagePath))
-                            {
-                                <img src="/@book.CoverImagePath" class="card-img-top book-cover" alt="@book.Title">
-                            }
-                            else
-                            {
-                                <div class="book-cover bg-secondary d-flex align-items-center justify-content-center">
-                                    <i class="fas fa-book fa-5x text-white"></i>
-                                </div>
-                            }
+                        <div class="card card-modern h-100">
+                            <!-- Featured Ribbon -->
+                            <div class="featured-ribbon">FEATURED</div>
+                            
+                            <!-- Book Cover -->
+                            <div style="position: relative; overflow: hidden; border-radius: 20px 20px 0 0;">
+                                @if (!string.IsNullOrEmpty(book.CoverImagePath))
+                                {
+                                    <img src="/@book.CoverImagePath" 
+                                         class="book-cover-modern" 
+                                         alt="@book.Title"
+                                         onerror="this.onerror=null; this.src='/images/default-book.jpg';">
+                                }
+                                else
+                                {
+                                    <div class="book-cover-modern bg-gradient d-flex align-items-center justify-content-center" 
+                                         style="background: var(--primary-gradient);">
+                                        <i class="fas fa-book fa-5x text-white opacity-50"></i>
+                                    </div>
+                                }
+                                
+                                <!-- Category Badge -->
+                                <span class="book-badge">@book.CategoryName</span>
+                            </div>
+                            
                             <div class="card-body">
                                 <h5 class="card-title">@book.Title</h5>
-                                <p class="card-text text-muted">
-                                    <i class="fas fa-user @(dir == "rtl" ? "ms-1" : "me-1")"></i>
+                                <p class="card-text">
+                                    <i class="fas fa-user @(dir == "rtl" ? "ms-2" : "me-2")" style="color: var(--primary-color);"></i>
                                     @book.Author
                                 </p>
-                                <div class="d-flex justify-content-between align-items-center">
+                                
+                                @if (!string.IsNullOrEmpty(book.Description))
+                                {
+                                    <p class="card-text text-muted small" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                                        @book.Description
+                                    </p>
+                                }
+                                
+                                <div class="d-flex justify-content-between align-items-center mt-3">
                                     <div class="rating-stars">
                                         @for (int i = 0; i < 5; i++)
                                         {
                                             <i class="fas fa-star"></i>
                                         }
+                                        <span class="text-muted ms-1">(4.8)</span>
                                     </div>
                                     <small class="text-muted">
                                         <i class="fas fa-eye @(dir == "rtl" ? "ms-1" : "me-1")"></i>
@@ -83,8 +152,10 @@
                                     </small>
                                 </div>
                             </div>
-                            <div class="card-footer bg-transparent border-top-0">
-                                <a asp-controller="Book" asp-action="Details" asp-route-id="@book.Id" class="btn btn-primary w-100">
+                            
+                            <div class="card-footer bg-transparent border-0 p-3">
+                                <a asp-controller="Book" asp-action="Details" asp-route-id="@book.Id" 
+                                   class="btn btn-gradient w-100">
                                     <i class="fas fa-book-reader @(dir == "rtl" ? "ms-2" : "me-2")"></i>
                                     @LocalizationHelper.GetText("Details", Context)
                                 </a>
@@ -93,51 +164,113 @@
                     </div>
                 }
             </div>
+            
+            <div class="text-center">
+                <a asp-controller="Book" asp-action="Index" class="btn btn-outline-gradient btn-lg">
+                    @LocalizationHelper.GetText("ViewAll", Context)
+                    <i class="fas fa-arrow-@(dir == "rtl" ? "left" : "right") @(dir == "rtl" ? "me-2" : "ms-2")"></i>
+                </a>
+            </div>
         </div>
     </section>
 }
 
+<!-- Statistics Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-md-3 col-sm-6">
+                <div class="stat-card stat-card-primary">
+                    <div class="stat-icon">
+                        <i class="fas fa-book"></i>
+                    </div>
+                    <div class="stat-number">@recentBooks.Count()+</div>
+                    <div class="stat-label">@LocalizationHelper.GetText("TotalBooks", Context)</div>
+                </div>
+            </div>
+            
+            <div class="col-md-3 col-sm-6">
+                <div class="stat-card stat-card-success">
+                    <div class="stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-number">1,000+</div>
+                    <div class="stat-label">@LocalizationHelper.GetText("TotalUsers", Context)</div>
+                </div>
+            </div>
+            
+            <div class="col-md-3 col-sm-6">
+                <div class="stat-card stat-card-warning">
+                    <div class="stat-icon">
+                        <i class="fas fa-download"></i>
+                    </div>
+                    <div class="stat-number">5,000+</div>
+                    <div class="stat-label">@LocalizationHelper.GetText("TotalDownloads", Context)</div>
+                </div>
+            </div>
+            
+            <div class="col-md-3 col-sm-6">
+                <div class="stat-card stat-card-info">
+                    <div class="stat-icon">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <div class="stat-number">500+</div>
+                    <div class="stat-label">@LocalizationHelper.GetText("TotalComments", Context)</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
 <!-- Recent Books Section -->
 @if (recentBooks.Any())
 {
-    <section class="py-5 bg-light">
+    <section class="py-5 bg-pattern">
         <div class="container">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2 class="h3 mb-0">
-                    <i class="fas fa-clock text-primary @(dir == "rtl" ? "ms-2" : "me-2")"></i>
-                    @LocalizationHelper.GetText("RecentBooks", Context)
-                </h2>
-                <a asp-controller="Book" asp-action="Index" class="btn btn-outline-primary">
+            <div class="section-header d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="section-title mb-0">
+                        <i class="fas fa-clock text-primary @(dir == "rtl" ? "ms-2" : "me-2")"></i>
+                        @LocalizationHelper.GetText("RecentBooks", Context)
+                    </h2>
+                </div>
+                <a asp-controller="Book" asp-action="Index" class="btn btn-outline-gradient">
                     @LocalizationHelper.GetText("ViewAll", Context)
                     <i class="fas fa-arrow-@(dir == "rtl" ? "left" : "right") @(dir == "rtl" ? "me-2" : "ms-2")"></i>
                 </a>
             </div>
             
-            <div class="row g-4">
+            <div class="row g-3">
                 @foreach (var book in recentBooks.Take(6))
                 {
-                    <div class="col-lg-2 col-md-4 col-sm-6">
-                        <div class="card card-custom h-100">
-                            @if (!string.IsNullOrEmpty(book.CoverImagePath))
-                            {
-                                <img src="/@book.CoverImagePath" class="card-img-top" style="height: 200px; object-fit: cover;" alt="@book.Title">
-                            }
-                            else
-                            {
-                                <div class="bg-secondary d-flex align-items-center justify-content-center" style="height: 200px;">
-                                    <i class="fas fa-book fa-3x text-white"></i>
+                    <div class="col-lg-2 col-md-4 col-6">
+                        <a asp-controller="Book" asp-action="Details" asp-route-id="@book.Id" 
+                           class="text-decoration-none">
+                            <div class="card card-modern h-100">
+                                @if (!string.IsNullOrEmpty(book.CoverImagePath))
+                                {
+                                    <img src="/@book.CoverImagePath" 
+                                         class="card-img-top" 
+                                         style="height: 220px; object-fit: cover; border-radius: 20px 20px 0 0;" 
+                                         alt="@book.Title"
+                                         onerror="this.onerror=null; this.src='/images/default-book.jpg';">
+                                }
+                                else
+                                {
+                                    <div class="d-flex align-items-center justify-content-center" 
+                                         style="height: 220px; background: var(--primary-gradient); border-radius: 20px 20px 0 0;">
+                                        <i class="fas fa-book fa-3x text-white opacity-50"></i>
+                                    </div>
+                                }
+                                
+                                <div class="card-body p-2 text-center">
+                                    <h6 class="card-title mb-1 small" style="font-size: 0.9rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                                        @book.Title
+                                    </h6>
+                                    <p class="card-text text-muted mb-0" style="font-size: 0.75rem;">@book.Author</p>
                                 </div>
-                            }
-                            <div class="card-body p-2">
-                                <h6 class="card-title mb-1" style="font-size: 0.9rem;">@book.Title</h6>
-                                <p class="card-text text-muted mb-0" style="font-size: 0.8rem;">@book.Author</p>
                             </div>
-                            <div class="card-footer bg-transparent border-top-0 p-2">
-                                <a asp-controller="Book" asp-action="Details" asp-route-id="@book.Id" class="btn btn-sm btn-primary w-100">
-                                    @LocalizationHelper.GetText("Details", Context)
-                                </a>
-                            </div>
-                        </div>
+                        </a>
                     </div>
                 }
             </div>
@@ -150,86 +283,82 @@
 {
     <section class="py-5">
         <div class="container">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2 class="h3 mb-0">
+            <div class="section-header text-center mb-4">
+                <h2 class="section-title">
                     <i class="fas fa-fire text-danger @(dir == "rtl" ? "ms-2" : "me-2")"></i>
                     @LocalizationHelper.GetText("PopularBooks", Context)
                 </h2>
-                <a asp-controller="Book" asp-action="Index" class="btn btn-outline-primary">
-                    @LocalizationHelper.GetText("ViewAll", Context)
-                    <i class="fas fa-arrow-@(dir == "rtl" ? "left" : "right") @(dir == "rtl" ? "me-2" : "ms-2")"></i>
-                </a>
+                <p class="section-subtitle">Most viewed and loved by our community</p>
             </div>
             
-            <div class="list-group">
-                @foreach (var book in popularBooks.Take(5))
-                {
-                    <a asp-controller="Book" asp-action="Details" asp-route-id="@book.Id" 
-                       class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-                        <div class="d-flex align-items-center">
-                            <i class="fas fa-book text-primary @(dir == "rtl" ? "ms-3" : "me-3")"></i>
-                            <div>
-                                <h6 class="mb-0">@book.Title</h6>
-                                <small class="text-muted">@book.Author</small>
+            <div class="row">
+                <div class="col-lg-8 mx-auto">
+                    @foreach (var book in popularBooks.Take(5))
+                    {
+                        <a asp-controller="Book" asp-action="Details" asp-route-id="@book.Id" 
+                           class="popular-book-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center flex-grow-1">
+                                    <div class="popular-book-icon @(dir == "rtl" ? "ms-3" : "me-3")">
+                                        <i class="fas fa-book"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <h6 class="popular-book-title mb-0">@book.Title</h6>
+                                        <small class="popular-book-author">@book.Author</small>
+                                    </div>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <span class="popular-book-badge">
+                                        <i class="fas fa-eye @(dir == "rtl" ? "ms-1" : "me-1")"></i>
+                                        @book.ViewCount
+                                    </span>
+                                    <span class="popular-book-badge">
+                                        <i class="fas fa-heart @(dir == "rtl" ? "ms-1" : "me-1")"></i>
+                                        @book.LikeCount
+                                    </span>
+                                </div>
                             </div>
-                        </div>
-                        <div>
-                            <span class="badge bg-primary">
-                                <i class="fas fa-eye @(dir == "rtl" ? "ms-1" : "me-1")"></i>
-                                @book.ViewCount
-                            </span>
-                            <span class="badge bg-success">
-                                <i class="fas fa-heart @(dir == "rtl" ? "ms-1" : "me-1")"></i>
-                                @book.LikeCount
-                            </span>
-                        </div>
-                    </a>
-                }
+                        </a>
+                    }
+                </div>
+            </div>
+            
+            <div class="text-center mt-4">
+                <a asp-controller="Book" asp-action="Index" class="btn btn-gradient btn-lg">
+                    <i class="fas fa-book-open @(dir == "rtl" ? "ms-2" : "me-2")"></i>
+                    Explore All Books
+                </a>
             </div>
         </div>
     </section>
 }
 
-<!-- Statistics Section -->
-<section class="py-5 bg-light">
-    <div class="container">
-        <div class="row text-center">
-            <div class="col-md-3 mb-4">
-                <div class="card card-custom border-0 bg-primary text-white">
-                    <div class="card-body">
-                        <i class="fas fa-book fa-3x mb-3"></i>
-                        <h3 class="display-6 fw-bold">@recentBooks.Count()+</h3>
-                        <p class="mb-0">@LocalizationHelper.GetText("TotalBooks", Context)</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3 mb-4">
-                <div class="card card-custom border-0 bg-success text-white">
-                    <div class="card-body">
-                        <i class="fas fa-users fa-3x mb-3"></i>
-                        <h3 class="display-6 fw-bold">1000+</h3>
-                        <p class="mb-0">@LocalizationHelper.GetText("TotalUsers", Context)</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3 mb-4">
-                <div class="card card-custom border-0 bg-warning text-white">
-                    <div class="card-body">
-                        <i class="fas fa-download fa-3x mb-3"></i>
-                        <h3 class="display-6 fw-bold">5000+</h3>
-                        <p class="mb-0">@LocalizationHelper.GetText("TotalDownloads", Context)</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3 mb-4">
-                <div class="card card-custom border-0 bg-info text-white">
-                    <div class="card-body">
-                        <i class="fas fa-star fa-3x mb-3"></i>
-                        <h3 class="display-6 fw-bold">500+</h3>
-                        <p class="mb-0">@LocalizationHelper.GetText("TotalComments", Context)</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
+@section Scripts {
+    <script>
+        // Smooth scroll animation on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add intersection observer for scroll animations
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+            
+            const observer = new IntersectionObserver(function(entries) {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, observerOptions);
+            
+            // Observe all cards
+            document.querySelectorAll('.card-modern, .stat-card').forEach(card => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(30px)';
+                card.style.transition = 'all 0.6s ease';
+                observer.observe(card);
+            });
+        });
+    </script>
+}
